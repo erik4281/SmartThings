@@ -80,4 +80,3 @@ private everyoneIsAway() {
     log.debug "everyoneIsAway: $result"
     return result
 }
-
