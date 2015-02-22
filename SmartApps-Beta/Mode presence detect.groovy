@@ -29,9 +29,6 @@ preferences {
 	section("When these presence sensors arrive or leave..."){
 		input "people", "capability.presenceSensor", title: "Who?", multiple: true, required: false
 	}
-//    section("False alarm threshold (defaults to 10 min)") {
-//        input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
-//    }
 	section ("When away...") {
 		input "awayMode", "mode", title: "Change mode to?", required: true
 		input "awayOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
@@ -43,16 +40,12 @@ preferences {
 		input "sunriseOffsetValue", "number", title: "Time offset (minutes after)", required: false
 		input "sunriseOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "sunriseOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
-		//input "sunriseOffsetValue", "text", title: "Time offset: HH:MM (optional)", required: false
-		//input "sunriseOffsetDir", "enum", title: "Before or After (optional)", required: false, options: ["Before","After"]
 	}
 	section ("When at home after sunset...") {
 		input "sunsetMode", "mode", title: "Change mode to?", required: true
 		input "sunsetOffsetValue", "number", title: "Time offset (minutes before)", required: false
 		input "sunsetOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "sunsetOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
-		//input "sunsetOffsetValue", "text", title: "Time offset: HH:MM (optional)", required: false
-		//input "sunsetOffsetDir", "enum", title: "Before or After (optional)", required: false, options: ["Before","After"]
 	}
 	section ("Don't change day/night when in this mode...") {
 		input "manualMode", "mode", title: "Mode?", required: false
@@ -74,8 +67,6 @@ def updated() {
 def initialize() {
 	subscribe(people, "presence", presenceHandler)
 	subscribe(location, "position", locationPositionChange)
-	//subscribe(location, "sunriseTime", sunriseTimeHandler)
-	//subscribe(location, "sunsetTime", sunriseTimeHandler)
 	subscribe(location, "sunriseTime", scheduleSunrise)
 	subscribe(location, "sunsetTime", scheduleSunset)
 	scheduleSunrise(location.currentValue("sunriseTime"))
@@ -86,20 +77,12 @@ def locationPositionChange(evt) {
 	log.trace "locationChange()"
 }
 
-//def sunriseTimeHandler(evt) {
-//	scheduleSunrise(evt.value)
-//}
-
-//def sunsetTimeHandler(evt) {
-//	scheduleSunset(evt.value)
-//}
-
 def scheduleSunrise(sunriseString) {
     def sunriseTime = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", sunriseString)
     def sunriseOffset = (sunriseOffsetValue != null) ? sunriseOffsetValue * 60000 : 0
     def timeOffsetSunrise = new Date(sunriseTime.time + sunriseOffset)
     log.debug "Scheduling for: $timeOffsetSunrise (sunrise is $sunriseTime)"
-	schedule(timeOffsetSunrise, sunriseHandler)
+    schedule(timeOffsetSunrise, sunriseHandler)
 }
 
 def scheduleSunset(sunsetString) {
@@ -107,7 +90,7 @@ def scheduleSunset(sunsetString) {
     def sunsetOffset = (sunsetOffsetValue != null) ? sunsetOffsetValue * 60000 : 0
     def timeOffsetSunset = new Date(sunsetTime.time - sunsetOffset)
     log.debug "Scheduling for: $timeOffsetSunset (sunset is $sunsetTime)"
-	schedule(timeOffsetSunset, sunsetHandler)
+    schedule(timeOffsetSunset, sunsetHandler)
 }
 
 def presenceHandler(evt) {
@@ -123,29 +106,29 @@ def presenceHandler(evt) {
     log.info refTime
     log.info timeOffsetSunrise
     log.info timeOffsetSunset
+    log.debug "state.quietNotify: $state.quietNotify"
     
 	if (everyoneIsAway()) {
         def delay = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? falseAlarmThreshold * 60 : 10 * 60
         log.info "Setting to away after the delay (${delay}s) has passed."
         runIn (delay, "awayHandler")
     }
-    else if (state.homeMode == "away") {
+    else if (state.homeMode == awayMode) {
         log.info "Set to present + give notification"
         if (timeOffsetSunset < timeOffsetSunrise && refTime < timeOffsetSunset) {
             log.info "Setting to home day mode."
-            sendNotificationEvent("Home-mode set to '${sunriseMode}'.")
             sunriseHandler()
         }
 		else {
             log.info "Setting to home night mode."
-            sendNotificationEvent("Home-mode set to '${sunsetMode}'.")
             sunsetHandler()
 		}
         state.homeMode = "present"
     }
     else {
         log.info "Set to present"
-        if (timeOffsetSunset < timeOffsetSunrise && refTime < timeOffsetSunset) {
+		state.quietNotify = true
+		if (timeOffsetSunset < timeOffsetSunrise && refTime < timeOffsetSunset) {
             log.info "Setting to home day mode."
             sunriseHandler()
         }
@@ -166,6 +149,12 @@ def sunriseHandler() {
 		if (location.mode == manualMode) {
 		}
 		else {
+            if (state.quietNotify) {
+            }
+            else {
+            	log.info "Now sending SUNRISE notification"
+                sendNotificationEvent("Home-mode set to '${sunriseMode}'.")
+            }
             changeMode(sunriseMode)
             if (sunriseOn) {
                 sunriseOn.on()
@@ -173,6 +162,7 @@ def sunriseHandler() {
             if (sunriseOff) {
                 sunriseOff.off()
             }
+            state.quietNotify = null
 		}
 	}
 }
@@ -186,6 +176,12 @@ def sunsetHandler() {
 		if (location.mode == manualMode) {
 		}
 		else {
+            if (state.quietNotify) {
+            }
+            else {
+	            log.info "Now sending SUNSET notification"
+                sendNotificationEvent("Home-mode set to '${sunsetMode}'.")
+            }
             changeMode(sunsetMode)
             if (sunsetOn) {
                 sunsetOn.on()
@@ -193,6 +189,7 @@ def sunsetHandler() {
             if (sunsetOff) {
                 sunsetOff.off()
             }
+            state.quietNotify = null
 		}
 	}
 }
@@ -200,6 +197,7 @@ def sunsetHandler() {
 def awayHandler() {
 	if (everyoneIsAway()) {		
 		log.info "NOW Executing away handler."
+        log.info "Now sending AWAY notification"
         sendNotificationEvent("Home-mode set to '${awayMode}'.")
         state.homeMode = "away"
         changeMode(awayMode)
