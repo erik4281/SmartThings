@@ -235,9 +235,17 @@ private restoreStates(sceneId) {
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
 			light.on()
+			light.on()
+			light.on()
+            light.on()
+            light.on()
 		}
 		else {
 			light.off()
+			light.off()
+			light.off()
+            light.off()
+            light.off()
 		}
 
 		if (type != "switch") {
@@ -247,6 +255,10 @@ private restoreStates(sceneId) {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(value)
+					light.setLevel(value)
+					light.setLevel(value)
+                    light.setLevel(value)
+                    light.setLevel(value)
 				}
 			}
 			else if (type == "color") {
@@ -257,14 +269,26 @@ private restoreStates(sceneId) {
 					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 					if (level != null) {
 						light.setColor(level: level, hue: hue, saturation: saturation)
+						light.setColor(level: level, hue: hue, saturation: saturation)
+						light.setColor(level: level, hue: hue, saturation: saturation)
+                        light.setColor(level: level, hue: hue, saturation: saturation)
+                        light.setColor(level: level, hue: hue, saturation: saturation)
 					}
 					else {
 						light.setColor(hue: hue, saturation: saturation)
+						light.setColor(hue: hue, saturation: saturation)
+						light.setColor(hue: hue, saturation: saturation)
+                        light.setColor(hue: hue, saturation: saturation)
+                        light.setColor(hue: hue, saturation: saturation)
 					}
 				}
 				else {
 					log.debug "${light.displayName} level is '$level'"
 					if (level != null) {
+						light.setLevel(level)
+						light.setLevel(level)
+                        light.setLevel(level)
+                        light.setLevel(level)
 						light.setLevel(level)
 					}
 				}
