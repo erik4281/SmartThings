@@ -113,7 +113,7 @@ def presenceHandler(evt) {
         log.info "Setting to away after the delay (${delay}s) has passed."
         runIn (delay, "awayHandler")
     }
-    else if (state.homeMode == awayMode) {
+    else if (location.mode == awayMode) {
         log.info "Set to present + give notification"
         if (timeOffsetSunset < timeOffsetSunrise && refTime < timeOffsetSunset) {
             log.info "Setting to home day mode."
@@ -123,7 +123,7 @@ def presenceHandler(evt) {
             log.info "Setting to home night mode."
             sunsetHandler()
 		}
-        state.homeMode = "present"
+        //state.homeMode = "present"
     }
     else {
         log.info "Set to present"
@@ -136,7 +136,7 @@ def presenceHandler(evt) {
             log.info "Setting to home night mode."
             sunsetHandler()
 		}
-        state.homeMode = "present"
+        //state.homeMode = "present"
     }
 }
 
@@ -158,8 +158,16 @@ def sunriseHandler() {
             changeMode(sunriseMode)
             if (sunriseOn) {
                 sunriseOn.on()
+                sunriseOn.on()
+                sunriseOn.on()
+                sunriseOn.on()
+                sunriseOn.on()
             }
             if (sunriseOff) {
+                sunriseOff.off()
+                sunriseOff.off()
+                sunriseOff.off()
+                sunriseOff.off()
                 sunriseOff.off()
             }
             state.quietNotify = null
@@ -185,8 +193,16 @@ def sunsetHandler() {
             changeMode(sunsetMode)
             if (sunsetOn) {
                 sunsetOn.on()
+                sunsetOn.on()
+                sunsetOn.on()
+                sunsetOn.on()
+                sunsetOn.on()
             }
             if (sunsetOff) {
+                sunsetOff.off()
+                sunsetOff.off()
+                sunsetOff.off()
+                sunsetOff.off()
                 sunsetOff.off()
             }
             state.quietNotify = null
@@ -199,13 +215,21 @@ def awayHandler() {
 		log.info "NOW Executing away handler."
         log.info "Now sending AWAY notification"
         sendNotificationEvent("Home-mode set to '${awayMode}'.")
-        state.homeMode = "away"
+        //state.homeMode = "away"
         changeMode(awayMode)
 		if (awayOn) {
 			awayOn.on()
+            awayOn.on()
+            awayOn.on()
+            awayOn.on()
+            awayOn.on()
 		}
 		if (awayOff) {
         	awayOff.off()
+            awayOff.off()
+            awayOff.off()
+            awayOff.off()
+            awayOff.off()
 		}
 	}
 	else{
