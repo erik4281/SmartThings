@@ -34,6 +34,7 @@ def switchPage() {
 	dynamicPage(name: "switchPage") {
         section("Monitor sensors..."){
             input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
+            input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
 			input "delayMinutes", "number", title: "Off after x minutes", required: false
         }
         section("Switch ON..."){
@@ -124,6 +125,7 @@ def updated() {
 def subscribeToEvents() {
 	subscribe(app, appTouchHandler)
 	subscribe(motionSensor, "motion", motionHandler)
+	subscribe(contactSensor, "contact", contactHandler)
 
 	if (lightSensor) {
 		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])
@@ -181,7 +183,7 @@ def motionHandler(evt) {
             state.motionStopTime = now()
             if(delayMinutes) {
                 runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
-                log.info "Delay: $delayMinutes minutes"
+                log.info "Delay (motion): $delayMinutes minutes"
             } 
             else {
                 turnOffMotionAfterDelay()
@@ -195,7 +197,42 @@ def motionHandler(evt) {
         else {
             state.motionStopTime = now()
             runIn(30*60, turnOffMotionAfterDelay, [overwrite: false])
-            log.info "Delay: 30 minutes (backup off switch)"
+            log.info "Delay (motion): 30 minutes (backup off switch)"
+        }
+    }
+}
+
+def contactHandler(evt) {
+	//log.trace "contactHandler($evt.name: $evt.value)"
+	log.trace "contactHandler"
+	def current = contactSensor.currentValue("contact")
+	def contactValue = contactSensor.find{it.currentContact == "open"}
+	if (allOk) {
+        if (contactValue) {
+            state.motionStopTime = null
+            if (allOkExtra) {
+	            activateHue()
+            }
+        }
+        else {
+            state.motionStopTime = now()
+            if(delayMinutes) {
+                runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
+                log.info "Delay (contact): $delayMinutes minutes"
+            } 
+            else {
+                turnOffMotionAfterDelay()
+            }
+        }
+    }
+    else {
+        if (contactValue) {
+            state.motionStopTime = null
+        }
+        else {
+            state.motionStopTime = now()
+            runIn(30*60, turnOffMotionAfterDelay, [overwrite: false])
+            log.info "Delay (contact): 30 minutes (backup off switch)"
         }
     }
 }
@@ -229,18 +266,18 @@ def modeChangeHandler(evt) {
 		activateHue()
 	}
 	if (evt.value in triggerModesOff) {
-		turnOffMotionAfterDelay()
+		deactivateHue()
 	}
 }
 
 def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
-	activateHue(evt)
+	activateHue()
 }
 
 def scheduledTimeOffHandler() {
 	log.trace "scheduledTimeOffHandler()"
-	turnOffMotionAfterDelay()
+	deactivateHue()
 }
 
 /******************
