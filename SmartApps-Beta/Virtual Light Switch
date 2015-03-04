@@ -35,7 +35,6 @@ definition(
 
 preferences {
     page(name: "switchPage", title: "Switch on lights when this happens:", nextPage: "optionsPage", uninstall: true) 
-    //page(name: "switchSelectPage", title: "Turn on these lights:", nextPage: "optionsPage", uninstall: true) 
     page(name: "optionsPage", title: "Use these options:", install: true, uninstall: true) 
 }
 
@@ -65,20 +64,6 @@ def switchPage() {
 		}
 	}
 }
-
-//def switchSelectPage() {
-//	dynamicPage(name: "switchSelectPage") {
-//        section("Control these switches (set 1)") {
-//            input "switch1a", "capability.switch", title: "Which switches?", required:true, multiple:true
-//        }
-//        section("Control these switches (set 2)") {
-//            input "switch2", "capability.switch", title: "Which switches?", required:false, multiple:true
-//        }
-//        section("Control these switches (set 3)") {
-//            input "switch3", "capability.switch", title: "Which switches?", required:false, multiple:true
-//        }
-//    }
-//}
 
 def optionsPage() {
 	dynamicPage(name: "optionsPage") {
@@ -164,7 +149,6 @@ def appTouchHandler(evt) {
 }
 
 def motionHandler(evt) {
-	//log.trace "motionHandler($evt.name: $evt.value)"
 	log.trace "motionHandler"
 	def current = motionSensor.currentValue("motion")
 	def motionValue = motionSensor.find{it.currentMotion == "active"}
@@ -203,7 +187,6 @@ def motionHandler(evt) {
 }
 
 def contactHandler(evt) {
-	//log.trace "contactHandler($evt.name: $evt.value)"
 	log.trace "contactHandler"
 	def current = contactSensor.currentValue("contact")
 	def contactValue = contactSensor.find{it.currentContact == "open"}
@@ -265,7 +248,6 @@ def illuminanceHandler(evt) {
 }
 
 def modeChangeHandler(evt) {
-	//log.trace "modeChangeHandler $evt.name: $evt.value""
 	if (evt.value in triggerModes) {
 		activateSwitch()
 	}
@@ -312,12 +294,6 @@ def activateSwitch() {
     if (switch1) {
         startSwitch(switch1)
     }
-//    if (switch2) {
-//        startSwitch(switch2)
-//    }
-//    if (switch3) {
-//        startSwitch(switch3)
-//    }
 	state.lastStatus = "on"
 }
 
@@ -325,12 +301,6 @@ def deactivateSwitch() {
     if (switch1) {
         stopSwitch(switch1)
     }
-//    if (switch2) {
-//        stopSwitch(switch2)
-//    }
-//    if (switch3) {
-//        stopSwitch(switch3)
-//    }
     state.lastStatus = "off"
 }
 
