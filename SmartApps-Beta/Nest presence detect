@@ -28,24 +28,51 @@ preferences {
   	section("When these people arrive and leave..."){
 		input "people", "capability.presenceSensor", title: "Who?", multiple: true, required: false
 	}
+	section("... or this switch is switched...") {
+		input "nestSwitch", "capability.switch", multiple: false, required: false
+	}
 	section("... change modes for these thermostat(s)...") {
 		input "thermostats", "capability.thermostat", multiple: true
 	}
 }
 
 def installed() {
-	subscribe(people, "presence", peopleHandler)
 	initialize()
 }
 
 def updated() {
 	unsubscribe()
-	subscribe(people, "presence", peopleHandler)
 	initialize()
 }
 
 def initialize() {
-	subscribe(people, "presence", peopleHandler)
+	if (people) {
+    	subscribe(people, "presence", peopleHandler)
+    }
+    if (nestSwitch) {
+		subscribe(nestSwitch, "switch", switchHandler)
+    }
+}
+
+def switchHandler(evt) {
+	log.debug "evt.name: $evt.value"
+    def switchStatus = evt.value
+    if (state.quietSwitch) {
+    }
+    else {
+        if (switchStatus == "on") {
+            thermostats?.present()
+            log.debug "Somebody arrived, Nest is set to Present."
+            sendNotificationEvent("Nest set to 'Present'")
+            state.thermostat = "present"
+        }
+        else {
+            thermostats?.away()
+            log.debug "Everybody left, Nest is set to Away."
+            sendNotificationEvent("Nest set to 'Away'")
+            state.thermostat = "away"
+        }
+	}
 }
 
 def peopleHandler(evt) {
@@ -53,20 +80,38 @@ def peopleHandler(evt) {
     if (everyoneIsAway()) {
         thermostats?.away()
         log.debug "Everybody left, Nest is set to Away."
-        sendNotificationEvent("Nest set to 'Away'")
         state.thermostat = "away"
+        if (nestSwitch) {
+        	state.quietSwitch = true
+        	nestSwitch.off()
+		}
+        else {
+        	sendNotificationEvent("Nest set to 'Away'")
+        }
     }
     else if (state.thermostat == "away") {
         thermostats?.present()
         log.debug "Somebody arrived, Nest is set to Present."
-        sendNotificationEvent("Nest set to 'Present'")
         state.thermostat = "present"
+        if (nestSwitch) {
+        	state.quietSwitch = true
+            nestSwitch.on()
+		}
+        else {
+        	sendNotificationEvent("Nest set to 'Present'")
+        }
     }
     else {
         thermostat?.present()
         log.debug "Somebody arrived or left, at least 1 person present. Nest set to Home."
         state.thermostat = "present"
+        if (nestSwitch) {
+        	state.quietSwitch = true
+            nestSwitch.on()
+		}
+
     }
+    state.quietSwitch = false
 }
 
 private everyoneIsAway() {
