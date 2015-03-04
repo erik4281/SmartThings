@@ -160,15 +160,6 @@ def modeChangeHandler(evt) {
 	}
 }
 
-def scheduledTimeHandler() {
-	log.trace "scheduledTimeHandler()"
-	def current = inputSwitch.currentValue('switch')
-	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    if (switchValue) {
-		activateHue()
-    }
-}
-
 /******************
  * Helper methods *
  ******************/
