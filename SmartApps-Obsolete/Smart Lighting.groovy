@@ -168,7 +168,6 @@ def appTouchHandler(evt) {
 }
 
 def motionHandler(evt) {
-	//log.trace "motionHandler($evt.name: $evt.value)"
 	log.trace "motionHandler"
 	def current = motionSensor.currentValue("motion")
 	def motionValue = motionSensor.find{it.currentMotion == "active"}
@@ -203,7 +202,6 @@ def motionHandler(evt) {
 }
 
 def contactHandler(evt) {
-	//log.trace "contactHandler($evt.name: $evt.value)"
 	log.trace "contactHandler"
 	def current = contactSensor.currentValue("contact")
 	def contactValue = contactSensor.find{it.currentContact == "open"}
@@ -261,7 +259,6 @@ def illuminanceHandler(evt) {
 }
 
 def modeChangeHandler(evt) {
-	//log.trace "modeChangeHandler $evt.name: $evt.value""
 	if (evt.value in triggerModes) {
 		activateHue()
 	}
@@ -374,11 +371,6 @@ def startHue(lightSelect, colorSelect, levelSelect) {
         lightSelect*.setColor(newValue)
         lightSelect*.setColor(newValue)
         lightSelect*.setColor(newValue)
-        //lightSelect*.setColor(newValue)
-        //lightSelect*.setColor(newValue)
-        //lightSelect*.setColor(newValue)
-        //lightSelect*.setColor(newValue)
-        //lightSelect*.setColor(newValue)
 		log.debug "new value = $newValue"
     }
     else
@@ -388,11 +380,6 @@ def startHue(lightSelect, colorSelect, levelSelect) {
     	lightSelect*.on()
         lightSelect*.on()
     	lightSelect*.on()
-    	//lightSelect*.on()
-    	//lightSelect*.on()
-    	//lightSelect*.on()
-    	//lightSelect*.on()
-    	//lightSelect*.on()
     }
 }
 
@@ -404,11 +391,6 @@ def stopHue(lightSelect) {
 	lightSelect*.off()
 	lightSelect*.off()
 	lightSelect*.off()
-	//lightSelect*.off()
-	//lightSelect*.off()
-	//lightSelect*.off()
-	//lightSelect*.off()
-	//lightSelect*.off()
 }
 
 private dayString(Date date) {
