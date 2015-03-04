@@ -225,7 +225,10 @@ private restoreStates(sceneId) {
     def setScene = settings."sceneMode_${sceneId}"
     if (setScene) {
 		log.debug "Home-mode set to '${setScene}'."
-		changeMode(setScene)
+        if (location.mode != setScene) {
+			sendNotificationEvent("Home-mode set to '${setScene}'.")
+        }
+        changeMode(setScene)
 	}
 
 	lights.each {light ->
@@ -345,7 +348,7 @@ private getOrientation(xyz=null) {
 	def y = Math.abs(value.y) > threshold ? (value.y > 0 ? 1 : -1) : 0
 	def z = Math.abs(value.z) > threshold ? (value.z > 0 ? 1 : -1) : 0
 
-	def orientation = 0
+	def orientation = 6
 	if (z > 0) {
 		if (x == 0 && y == 0) {
 			orientation = 1
@@ -395,3 +398,6 @@ def changeMode(newMode) {
 		}
 	}
 }
+
+
+
