@@ -76,10 +76,6 @@ def scenePage(params=[:]) {
 		}
 
 		section {
-			input "sceneMode_${sceneId}", "mode", title: "Change mode to?", required: false
-        }
-        
-		section {
 			href "devicePage", title: "Show Device States", params: [sceneId:sceneId], description: "", state: sceneIsDefined(sceneId) ? "complete" : "incomplete"
 		}
 
@@ -222,15 +218,6 @@ private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
 	
-    def setScene = settings."sceneMode_${sceneId}"
-    if (setScene) {
-		log.debug "Home-mode set to '${setScene}'."
-        if (location.mode != setScene) {
-			sendNotificationEvent("Home-mode set to '${setScene}'.")
-        }
-        changeMode(setScene)
-	}
-
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 
