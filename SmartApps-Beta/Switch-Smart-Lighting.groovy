@@ -34,22 +34,9 @@ definition(
  **********/
 
 preferences {
-    //page(name: "switchPage", title: "Switch on lights when this happens:", nextPage: "lightSelectPage", uninstall: true) 
     page(name: "lightSelectPage", title: "Turn on these lights:", nextPage: "optionsPage", uninstall: true) 
     page(name: "optionsPage", title: "Use these options:", install: true, uninstall: true) 
 }
-
-//def switchPage() {
-//	dynamicPage(name: "switchPage") {
-//        section("Input switch..."){
-//            input "switch", "capability.switch", title: "Switches", required: true, multiple: true
-//        }
-//        section("Switch to these settings (when switch was already on)..."){
-//            input "triggerModes", "mode", title: "System Changes Mode", required: false, multiple: true
-//            input "timeOfDay", "time", title: "At a Scheduled Time", required: false
-//        }
-//	}
-//}
 
 def lightSelectPage() {
 	dynamicPage(name: "lightSelectPage") {
