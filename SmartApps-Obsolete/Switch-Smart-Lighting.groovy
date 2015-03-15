@@ -14,7 +14,7 @@
  *
  */
  
- /************
+/************
  * Metadata *
  ************/
 
@@ -125,7 +125,7 @@ def subscribeToEvents() {
  ******************/
 
 def appTouchHandler(evt) {
-	log.trace "app started manually"
+	log.info "app started manually"
     activateHue()
 }
 
@@ -165,12 +165,16 @@ def modeChangeHandler(evt) {
  ******************/
 
 def activateHue() {
+    def waiting = 250
+    log.debug waiting
     if (lights1) {
         startHue(lights1, color1, lightLevel1)
     }
+	pause(waiting)
     if (lights2) {
         startHue(lights2, color2, lightLevel2)
 	}
+	pause(waiting)
     if (lights3) {
         startHue(lights3, color3, lightLevel3)
     }
@@ -178,16 +182,20 @@ def activateHue() {
 }
 
 def deactivateHue() {
+    def waiting = 250
+    log.debug waiting
     if (lights1) {
         stopHue(lights1)
     }
+	pause(waiting)
     if (lights2) {
         stopHue(lights2)
     }
+	pause(waiting)
     if (lights3) {
         stopHue(lights3)
     }
-    state.lastStatus = "off"
+	state.lastStatus = "off"
 }
 
 def startHue(lightSelect, colorSelect, levelSelect) {
@@ -239,30 +247,47 @@ def startHue(lightSelect, colorSelect, levelSelect) {
 	if (colorSelect != "On - Custom Color")
     {
         def newValue = [hue: hueColor, saturation: saturation, level: levelSelect as Integer ?: 100]
+        def wait = 50
+        log.debug wait
         lightSelect*.setColor(newValue)
+        pause(wait)
         lightSelect*.setColor(newValue)
+        pause(wait)
         lightSelect*.setColor(newValue)
+        pause(wait)
         lightSelect*.setColor(newValue)
+        pause(wait)
         lightSelect*.setColor(newValue)
 		log.debug "new value = $newValue"
     }
     else
     {
+        def wait = 50
+        log.debug wait
     	lightSelect*.on()
+        pause(wait)
     	lightSelect*.on()
+        pause(wait)
     	lightSelect*.on()
+        pause(wait)
         lightSelect*.on()
+        pause(wait)
     	lightSelect*.on()
     }
 }
 
 def stopHue(lightSelect) {
 	log.trace "Deactivating Hue '$lightSelect'"
-
+    def wait = 50
+    log.debug wait
 	lightSelect*.off()
+	pause(wait)
 	lightSelect*.off()
+	pause(wait)
 	lightSelect*.off()
+	pause(wait)
 	lightSelect*.off()
+	pause(wait)
 	lightSelect*.off()
 }
 
