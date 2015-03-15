@@ -28,7 +28,6 @@ definition(
     iconX2Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png")
 
-
 /**********
  * Setup  *
  **********/
@@ -291,14 +290,18 @@ def turnOffMotionAfterDelaySleep() {
 }
 
 def activateSwitch() {
-    if (switch1) {
+	def current = switch1.currentValue('switch')
+	def switchValue = switch1.find{it.currentSwitch == "off"}
+    if (switchValue) {
         startSwitch(switch1)
     }
 	state.lastStatus = "on"
 }
 
 def deactivateSwitch() {
-    if (switch1) {
+	def current = switch1.currentValue('switch')
+	def switchValue = switch1.find{it.currentSwitch == "on"}
+    if (switchValue) {
         stopSwitch(switch1)
     }
     state.lastStatus = "off"
