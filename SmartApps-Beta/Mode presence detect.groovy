@@ -14,6 +14,10 @@
  *
  */
 
+/************
+ * Metadata *
+ ************/
+
 definition(
     name: "Mode presence detect",
     namespace: "evennink",
@@ -24,6 +28,10 @@ definition(
     iconX2Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png")
 
+
+/**********
+ * Setup  *
+ **********/
 
 preferences {
 	section("When these presence sensors arrive or leave..."){
@@ -52,6 +60,10 @@ preferences {
 	}
 }
 
+/*************************
+ * Installation & update *
+ *************************/
+
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 	initialize()
@@ -72,6 +84,10 @@ def initialize() {
 	scheduleSunrise(location.currentValue("sunriseTime"))
 	scheduleSunset(location.currentValue("sunsetTime"))
 }
+
+/******************
+ * Event handlers *
+ ******************/
 
 def locationPositionChange(evt) {
 	log.trace "locationChange()"
@@ -207,6 +223,10 @@ def awayHandler() {
 		log.info "NOW Executing away handler, but not started, because people are present."
 	}
 }
+
+/******************
+ * Helper methods *
+ ******************/
 
 def changeMode(newMode) {
 	if (newMode && location.mode != newMode) {
