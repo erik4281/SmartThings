@@ -221,4 +221,3 @@ private getTimeOkWake() {
 	log.trace "timeOk = $result"
 	result
 }
-
