@@ -28,7 +28,6 @@ definition(
     iconX2Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png")
 
-
 /**********
  * Setup  *
  **********/
