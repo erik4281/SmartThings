@@ -17,6 +17,7 @@
 /************
  * Metadata *
  ************/
+ 
 definition(
 	name: "Mood Cube with mode switch",
 	namespace: "evennink",
@@ -30,6 +31,7 @@ definition(
 /**********
  * Setup  *
  **********/
+ 
 preferences {
 	page(name: "mainPage", title: "", nextPage: "scenesPage", uninstall: true) {
 		section("Use the orientation of this cube") {
@@ -136,10 +138,10 @@ def saveStatesPage(params) {
 	devicePage(params)
 }
 
-
 /*************************
  * Installation & update *
  *************************/
+ 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 
@@ -157,10 +159,10 @@ def initialize() {
 	subscribe cube, "threeAxis", positionHandler
 }
 
-
 /******************
  * Event handlers *
  ******************/
+ 
 def positionHandler(evt) {
 
 	def sceneId = getOrientation(evt.xyzValue)
@@ -175,10 +177,10 @@ def positionHandler(evt) {
 	state.lastActiveSceneId = sceneId
 }
 
-
 /******************
  * Helper methods *
  ******************/
+ 
 private Boolean sceneIsDefined(sceneId) {
 	def tgt = "onoff_${sceneId}".toString()
 	settings.find{it.key.startsWith(tgt)} != null
@@ -224,17 +226,29 @@ private restoreStates(sceneId) {
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
+            def wait = 50
+            log.debug wait
 			light.on()
+			pause(wait)
 			light.on()
+			pause(wait)
 			light.on()
+			pause(wait)
             light.on()
+			pause(wait)
             light.on()
 		}
 		else {
+            def wait = 50
+            log.debug wait
 			light.off()
+			pause(wait)
 			light.off()
+			pause(wait)
 			light.off()
+			pause(wait)
             light.off()
+			pause(wait)
             light.off()
 		}
 
@@ -244,10 +258,16 @@ private restoreStates(sceneId) {
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
+                    def wait = 50
+                    log.debug wait
 					light.setLevel(value)
+					pause(wait)
 					light.setLevel(value)
+					pause(wait)
 					light.setLevel(value)
+					pause(wait)
                     light.setLevel(value)
+					pause(wait)
                     light.setLevel(value)
 				}
 			}
@@ -258,27 +278,45 @@ private restoreStates(sceneId) {
 					def saturation = segs[1].toInteger()
 					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 					if (level != null) {
+                        def wait = 50
+                        log.debug wait
 						light.setColor(level: level, hue: hue, saturation: saturation)
+						pause(wait)
 						light.setColor(level: level, hue: hue, saturation: saturation)
+						pause(wait)
 						light.setColor(level: level, hue: hue, saturation: saturation)
+						pause(wait)
                         light.setColor(level: level, hue: hue, saturation: saturation)
+						pause(wait)
                         light.setColor(level: level, hue: hue, saturation: saturation)
 					}
 					else {
+                        def wait = 50
+                        log.debug wait
 						light.setColor(hue: hue, saturation: saturation)
+						pause(wait)
 						light.setColor(hue: hue, saturation: saturation)
+						pause(wait)
 						light.setColor(hue: hue, saturation: saturation)
+						pause(wait)
                         light.setColor(hue: hue, saturation: saturation)
+						pause(wait)
                         light.setColor(hue: hue, saturation: saturation)
 					}
 				}
 				else {
 					log.debug "${light.displayName} level is '$level'"
 					if (level != null) {
+                        def wait = 50
+                        log.debug wait
 						light.setLevel(level)
+						pause(wait)
 						light.setLevel(level)
+						pause(wait)
                         light.setLevel(level)
+						pause(wait)
                         light.setLevel(level)
+						pause(wait)
 						light.setLevel(level)
 					}
 				}
@@ -287,8 +325,6 @@ private restoreStates(sceneId) {
 				log.error "Unknown type '$type'"
 			}
 		}
-
-
 	}
 }
 
@@ -374,17 +410,3 @@ private sceneName(num) {
 	final names = ["UNDEFINED","One","Two","Three","Four","Five","Six"]
 	settings."sceneName${num}" ?: "Scene ${names[num]}"
 }
-
-def changeMode(newMode) {
-	log.debug "Setting home to $newMode"
-	if (newMode && location.mode != newMode) {
-		if (location.modes?.find{it.name == newMode}) {
-			setLocationMode(newMode)
-		}
-		else {
-		}
-	}
-}
-
-
-
