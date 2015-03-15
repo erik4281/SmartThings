@@ -134,13 +134,22 @@ def switchHandler(evt) {
 	log.trace "switchHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
+    def waitMode = 2500
+	//pause(waitMode)
 	if (allOk && switchValue) {
+        activateHue()
+        pause(waitMode)
         activateHue()
     }
 	else if (switchValue) {
     	log.info "Wrong mode to activate anything"
     }
 	else {
+        pause(waitMode)
+        deactivateHue()
+        pause(waitMode)
+        deactivateHue()
+        pause(waitMode)
         deactivateHue()
     }
 }
@@ -149,15 +158,20 @@ def modeChangeHandler(evt) {
 	log.trace "modeChangeHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
+    def waitMode = 2500
+	pause(waitMode)
 	if (evt.value in modes && switchValue) {
     	log.trace "do it!"
 		activateHue()
+        pause(waitMode)
+        activateHue()
 	}
     else if (switchValue) {
     	log.info "Wrong mode to activate anything"
 	}
     else {
-    	deactivateHue()
+    	//deactivateHue()
+    	log.info "Nothing to do..."
 	}
 }
 
@@ -172,7 +186,7 @@ private closestLevel(level) {
 private activateHue() {
 	log.trace "Activating!"
 	state.lastStatus = "on"
-    def wait = 1
+    def wait = 5
     log.debug wait
 
 	getDeviceCapabilities()
@@ -188,10 +202,10 @@ private activateHue() {
 			light.on()
 			pause(wait)
 			light.on()
-			pause(wait)
-            light.on()
-			pause(wait)
-            light.on()
+			//pause(wait)
+            //light.on()
+			//pause(wait)
+            //light.on()
 		}
 		else {
 			light.off()
@@ -199,14 +213,14 @@ private activateHue() {
 			light.off()
 			pause(wait)
 			light.off()
-			pause(wait)
-            light.off()
-			pause(wait)
-            light.off()
+			//pause(wait)
+            //light.off()
+			//pause(wait)
+            //light.off()
 		}
 
 		if (type != "switch") {
-			def level = switchLevel(sceneId, light)
+			def level = switchLevel(light)
 
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
@@ -216,10 +230,10 @@ private activateHue() {
 					light.setLevel(value)
 					pause(wait)
 					light.setLevel(value)
-					pause(wait)
-                    light.setLevel(value)
-					pause(wait)
-                    light.setLevel(value)
+					//pause(wait)
+                    //light.setLevel(value)
+					//pause(wait)
+                    //light.setLevel(value)
 				}
 			}
 			else if (type == "color") {
@@ -234,10 +248,10 @@ private activateHue() {
 						light.setColor(level: level, hue: hue, saturation: saturation)
 						pause(wait)
 						light.setColor(level: level, hue: hue, saturation: saturation)
-						pause(wait)
-                        light.setColor(level: level, hue: hue, saturation: saturation)
-						pause(wait)
-                        light.setColor(level: level, hue: hue, saturation: saturation)
+						//pause(wait)
+                        //light.setColor(level: level, hue: hue, saturation: saturation)
+						//pause(wait)
+                        //light.setColor(level: level, hue: hue, saturation: saturation)
 					}
 					else {
 						light.setColor(hue: hue, saturation: saturation)
@@ -245,10 +259,10 @@ private activateHue() {
 						light.setColor(hue: hue, saturation: saturation)
 						pause(wait)
 						light.setColor(hue: hue, saturation: saturation)
-						pause(wait)
-                        light.setColor(hue: hue, saturation: saturation)
-						pause(wait)
-                        light.setColor(hue: hue, saturation: saturation)
+						//pause(wait)
+                        //light.setColor(hue: hue, saturation: saturation)
+						//pause(wait)
+                        //light.setColor(hue: hue, saturation: saturation)
 					}
 				}
 				else {
@@ -259,10 +273,10 @@ private activateHue() {
 						light.setLevel(level)
 						pause(wait)
                         light.setLevel(level)
-						pause(wait)
-                        light.setLevel(level)
-						pause(wait)
-						light.setLevel(level)
+						//pause(wait)
+                        //light.setLevel(level)
+						//pause(wait)
+						//light.setLevel(level)
 					}
 				}
 			}
@@ -276,7 +290,7 @@ private activateHue() {
 private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
-    def wait = 1
+    def wait = 25
     log.debug wait
 
 	lights.each {light ->
@@ -285,15 +299,15 @@ private deactivateHue() {
         light.off()
         pause(wait)
         light.off()
-        pause(wait)
-        light.off()
-        pause(wait)
-        light.off()
+        //pause(wait)
+        //light.off()
+        //pause(wait)
+        //light.off()
     }
 }
 
-private switchLevel(sceneId, light) {
-	def percent = settings."level_${sceneId}_${light.id}"
+private switchLevel(light) {
+	def percent = settings."level_${light.id}"
 	if (percent) {
 		percent[0..-2].toInteger()
 	}
