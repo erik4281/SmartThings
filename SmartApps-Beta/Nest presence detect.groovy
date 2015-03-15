@@ -13,6 +13,11 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+
+/************
+ * Metadata *
+ ************/
+
 definition(
     name: "Nest presence detect",
     namespace: "evennink",
@@ -23,6 +28,9 @@ definition(
     iconX2Url: "http://icons.iconarchive.com/icons/iconshock/vector-twitter/128/twitter-nest-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/iconshock/vector-twitter/128/twitter-nest-icon.png")
 
+/**********
+ * Setup  *
+ **********/
 
 preferences {
   	section("When these people arrive and leave..."){
@@ -35,6 +43,10 @@ preferences {
 		input "thermostats", "capability.thermostat", multiple: true
 	}
 }
+
+/*************************
+ * Installation & update *
+ *************************/
 
 def installed() {
 	initialize()
@@ -53,6 +65,10 @@ def initialize() {
 		subscribe(nestSwitch, "switch", switchHandler)
     }
 }
+
+/******************
+ * Event handlers *
+ ******************/
 
 def switchHandler(evt) {
 	log.debug "evt.name: $evt.value"
@@ -113,6 +129,10 @@ def peopleHandler(evt) {
     }
     state.quietSwitch = false
 }
+
+/******************
+ * Helper methods *
+ ******************/
 
 private everyoneIsAway() {
     def result = true
