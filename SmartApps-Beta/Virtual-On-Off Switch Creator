@@ -13,6 +13,11 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+
+/************
+ * Metadata *
+ ************/
+
 definition(
     name: "Virtual On/Off Switch Creator",
     namespace: "evennink",
@@ -23,12 +28,19 @@ definition(
     iconX2Url: "http://baldeagle072.github.io/icons/standard-tile@2x.png",
     iconX3Url: "http://baldeagle072.github.io/icons/standard-tile@3x.png")
 
+/************
+ * Metadata *
+ ************/
 
 preferences {
 	section("Create Virtual Switch") {
 		input "switchLabel", "text", title: "Switch Label", required: true
 	}
 }
+
+/*************************
+ * Installation & update *
+ *************************/
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
@@ -55,6 +67,14 @@ def initialize() {
 def uninstalled() {
     removeChildDevices(getChildDevices())
 }
+
+/******************
+ * Event handlers *
+ ******************/
+
+/******************
+ * Helper methods *
+ ******************/
 
 private removeChildDevices(delete) {
     delete.each {
