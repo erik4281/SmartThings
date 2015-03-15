@@ -166,9 +166,13 @@ def initialize() {
 def positionHandler(evt) {
 
 	def sceneId = getOrientation(evt.xyzValue)
+    def waitMode = 2500
+
 	log.trace "orientation: $sceneId"
 
 	if (sceneId != state.lastActiveSceneId) {
+		restoreStates(sceneId)
+		pause(waitMode)
 		restoreStates(sceneId)
 	}
 	else {
@@ -219,6 +223,7 @@ private saveStates(params) {
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
+    def wait = 25
 	
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
@@ -226,12 +231,6 @@ private restoreStates(sceneId) {
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
-            def wait = 50
-            log.debug wait
-			light.on()
-			pause(wait)
-			light.on()
-			pause(wait)
 			light.on()
 			pause(wait)
             light.on()
@@ -239,12 +238,6 @@ private restoreStates(sceneId) {
             light.on()
 		}
 		else {
-            def wait = 50
-            log.debug wait
-			light.off()
-			pause(wait)
-			light.off()
-			pause(wait)
 			light.off()
 			pause(wait)
             light.off()
@@ -258,12 +251,6 @@ private restoreStates(sceneId) {
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
-                    def wait = 50
-                    log.debug wait
-					light.setLevel(value)
-					pause(wait)
-					light.setLevel(value)
-					pause(wait)
 					light.setLevel(value)
 					pause(wait)
                     light.setLevel(value)
@@ -278,12 +265,6 @@ private restoreStates(sceneId) {
 					def saturation = segs[1].toInteger()
 					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 					if (level != null) {
-                        def wait = 50
-                        log.debug wait
-						light.setColor(level: level, hue: hue, saturation: saturation)
-						pause(wait)
-						light.setColor(level: level, hue: hue, saturation: saturation)
-						pause(wait)
 						light.setColor(level: level, hue: hue, saturation: saturation)
 						pause(wait)
                         light.setColor(level: level, hue: hue, saturation: saturation)
@@ -291,12 +272,6 @@ private restoreStates(sceneId) {
                         light.setColor(level: level, hue: hue, saturation: saturation)
 					}
 					else {
-                        def wait = 50
-                        log.debug wait
-						light.setColor(hue: hue, saturation: saturation)
-						pause(wait)
-						light.setColor(hue: hue, saturation: saturation)
-						pause(wait)
 						light.setColor(hue: hue, saturation: saturation)
 						pause(wait)
                         light.setColor(hue: hue, saturation: saturation)
@@ -307,12 +282,6 @@ private restoreStates(sceneId) {
 				else {
 					log.debug "${light.displayName} level is '$level'"
 					if (level != null) {
-                        def wait = 50
-                        log.debug wait
-						light.setLevel(level)
-						pause(wait)
-						light.setLevel(level)
-						pause(wait)
                         light.setLevel(level)
 						pause(wait)
                         light.setLevel(level)
