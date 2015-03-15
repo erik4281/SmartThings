@@ -103,11 +103,6 @@ def presenceHandler(evt) {
     def timeOffsetSunrise = new Date(sunriseTime.time + sunriseOffset)
     def timeOffsetSunset = new Date(sunsetTime.time - sunsetOffset)
 	
-    log.info refTime
-    log.info timeOffsetSunrise
-    log.info timeOffsetSunset
-    log.debug "state.quietNotify: $state.quietNotify"
-    
 	if (everyoneIsAway()) {
         def delay = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? falseAlarmThreshold * 60 : 10 * 60
         log.info "Setting to away after the delay (${delay}s) has passed."
