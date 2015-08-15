@@ -42,7 +42,9 @@ def lightSelectPage() {
             input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
         }
 		section("To switch off these lights (when the switch is OFF)") {
-			input "lights", "capability.colorControl", multiple: true, required: false, title: "Lights, switches & dimmers"
+			//input "lights", "capability.colorControl", multiple: true, required: false, title: "Lights, switches & dimmers"
+			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
+
 		}
 		section("Use Hue-containment switch") {
 			input "containment", "capability.switch", title: "Switch"
