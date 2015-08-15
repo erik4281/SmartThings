@@ -22,7 +22,7 @@ definition(
     name: "Hue OffSwitch",
     namespace: "evennink",
     author: "Erik Vennink",
-    description: "Switch off Hue lights based on an (virtual) switch.",
+    description: "Switch off Hue lights based on an (virtual) switch. Available on GitHub.",
     category: "Fun & Social",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
