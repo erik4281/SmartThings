@@ -114,7 +114,7 @@ def subscribeToEvents() {
 	subscribe(app, appTouchHandler)
 	subscribe(inputSwitch, "switch", switchHandler)
 	if (starting) {
-    	subscribe(starting, scheduledTimeHandler)
+    	schedule(starting, scheduledTimeHandler)
     }
     if (modes) {
 		subscribe(location, modeChangeHandler)
@@ -160,6 +160,9 @@ def switchHandler(evt) {
 }
 
 def scheduledTimeHandler() {
+	activateHue()
+}
+def scheduledTimeHandler2() {
 	log.trace "scheduledTimeHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
