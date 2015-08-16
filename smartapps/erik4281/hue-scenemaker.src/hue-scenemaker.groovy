@@ -159,9 +159,6 @@ def switchHandler(evt) {
 	}
 }
 
-def scheduledTimeHandlerTest() {
-	activateHue()
-}
 def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
 	def current = inputSwitch.currentValue('switch')
@@ -172,7 +169,7 @@ def scheduledTimeHandler() {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
 	pause(waitStart)
-	if (ModeOk && switchValue) {
+	if (AllOk && switchValue) {
     	log.trace "do it!"
 		activateHue()
         if (containment && containment.currentSwitch == "on") {
@@ -204,7 +201,7 @@ def modeChangeHandler(evt) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
 	pause(waitStart)
-	if (ModeOk && switchValue) {
+	if (AllOk && switchValue) {
     	log.trace "do it!"
 		activateHue()
         if (containment && containment.currentSwitch == "on") {
