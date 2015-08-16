@@ -55,7 +55,7 @@ def lightSelectPage() {
 		}
         section("Lights will also change to these when the mode changes to the selected modes. This only happens when the input switch is enabled!")
 		section("Use Hue-containment switch") {
-			input "containment", "capability.switch", title: "Switch"
+			input "containment", "capability.switch", title: "Switch", required: false
 		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
@@ -159,10 +159,10 @@ def switchHandler(evt) {
 	}
 }
 
-def scheduledTimeHandler() {
+def scheduledTimeHandlerTest() {
 	activateHue()
 }
-def scheduledTimeHandler2() {
+def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
@@ -172,7 +172,7 @@ def scheduledTimeHandler2() {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
 	pause(waitStart)
-	if (evt.value in modes && switchValue) {
+	if (ModeOk && switchValue) {
     	log.trace "do it!"
 		activateHue()
         if (containment && containment.currentSwitch == "on") {
@@ -204,7 +204,7 @@ def modeChangeHandler(evt) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
 	pause(waitStart)
-	if (evt.value in modes && switchValue) {
+	if (ModeOk && switchValue) {
     	log.trace "do it!"
 		activateHue()
         if (containment && containment.currentSwitch == "on") {

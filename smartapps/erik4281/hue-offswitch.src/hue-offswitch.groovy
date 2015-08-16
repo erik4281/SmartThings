@@ -47,7 +47,7 @@ def lightSelectPage() {
 
 		}
 		section("Use Hue-containment switch") {
-			input "containment", "capability.switch", title: "Switch"
+			input "containment", "capability.switch", title: "Switch", required: false
 		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
