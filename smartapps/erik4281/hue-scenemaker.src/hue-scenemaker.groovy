@@ -132,9 +132,9 @@ def appTouchHandler(evt) {
 
 def switchHandler(evt) {
 	log.trace "switchHandler()"
+    def wait = 25
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    def wait = 25
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
@@ -161,14 +161,14 @@ def switchHandler(evt) {
 
 def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
+    def waitStart = 2500
+    def wait = 25
+	pause(waitStart)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    def waitStart = 500
-    def wait = 25
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
-	pause(waitStart)
 	if (AllOk && switchValue) {
     	log.trace "do it!"
 		activateHue()
@@ -193,14 +193,14 @@ def scheduledTimeHandler() {
 
 def modeChangeHandler(evt) {
 	log.trace "modeChangeHandler()"
+    def waitStart = 2500
+    def wait = 25
+	pause(waitStart)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    def waitStart = 500
-    def wait = 25
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
-	pause(waitStart)
 	if (AllOk && switchValue) {
     	log.trace "do it!"
 		activateHue()
