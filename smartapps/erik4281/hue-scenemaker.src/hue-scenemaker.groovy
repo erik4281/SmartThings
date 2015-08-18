@@ -138,7 +138,7 @@ def switchHandler(evt) {
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
-	if (allOk && switchValue) {
+	if (switchValue && allOk) {
         activateHue()
         if (containment && containment.currentSwitch == "on") {
 	        pause(wait)
@@ -169,7 +169,7 @@ def scheduledTimeHandler() {
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
-	if (AllOk && switchValue) {
+	if (switchValue && allOk) {
     	log.trace "do it!"
 		activateHue()
         if (containment && containment.currentSwitch == "on") {
@@ -201,7 +201,7 @@ def modeChangeHandler(evt) {
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
-	if (AllOk && switchValue) {
+	if (switchValue && allOk) {
     	log.trace "do it!"
 		activateHue()
         if (containment && containment.currentSwitch == "on") {
