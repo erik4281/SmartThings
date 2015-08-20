@@ -40,6 +40,9 @@ preferences {
 		section("To control these lights") {
 			input "lights", "capability.switch", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
+		section("AutoSwitching these Auto-switches") {
+			input "switches", "capability.switch", multiple: true, required: false, title: "Switches"
+		}        
 		section([title: " ", mobileOnly:true]) {
 			label title: "Assign a name", required: false
 			mode title: "Set for specific mode(s)", required: false
@@ -176,14 +179,30 @@ def initialize() {
 def positionHandler(evt) {
 
 	def sceneId = getOrientation(evt.xyzValue)
-    def wait = 25
+	def wait = 25
     if (containment) {
 		log.info "Containment: ${containment.currentSwitch}"
 	}
-
+	if (switches) { 
+    	switches.on () 
+        log.trace "Switches switched on"
+    }
 	log.trace "orientation: $sceneId"
 
 	if (sceneId != state.lastActiveSceneId) {
+		//sendNotificationEvent("MoodCube set to ${sceneName(sceneId)}")
+
+	    moodSwitch.each {moodCube ->
+			def moodOn = settings."onoff_${sceneId}_${moodCube.id}" == "true" ? true : false
+			log.info "${moodCube.displayName} is '$moodOn'"
+			if (moodOn) {
+				moodCube.on()
+			}
+			else {
+				moodCube.off()
+			}
+		}
+
 		restoreStates(sceneId)
         if (containment && containment.currentSwitch == "on") {
 			pause(wait)
@@ -195,6 +214,7 @@ def positionHandler(evt) {
 			pause(wait)
 			restoreStates(sceneId)
 		}
+        
 	}
 	else {
 		log.trace "No status change"
@@ -244,16 +264,6 @@ private saveStates(params) {
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
-    moodSwitch.each {moodCube ->
-		def moodOn = settings."onoff_${sceneId}_${moodCube.id}" == "true" ? true : false
-		log.info "${moodCube.displayName} is '$moodOn'"
-		if (moodOn) {
-			moodCube.on()
-		}
-		else {
-			moodCube.off()
-		}
-	}
 
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
