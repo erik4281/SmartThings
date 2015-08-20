@@ -67,6 +67,9 @@ def scenesPage() {
 		section("Use Hue-containment switch") {
 			input "containment", "capability.switch", title: "Switch"
 		}
+		section("Use MoodCube switch (disable auto-switching light at set times and modes when MoodCube is used)") {
+			input "moodSwitch", "capability.switch", title: "Switch", required: false
+		}
 	}
 }
 
@@ -83,6 +86,12 @@ def scenePage(params=[:]) {
 		section {
 			href "devicePage", title: "Show Device States", params: [sceneId:sceneId], description: "", state: sceneIsDefined(sceneId) ? "complete" : "incomplete"
 		}
+		section("MoodSwitch") {
+			moodSwitch.each {moodCube ->
+				input "onoff_${sceneId}_${moodCube.id}", "boolean", title: moodCube.displayName
+			}
+		}
+
 
 		if (sceneId == currentSceneId) {
 			section {
@@ -235,6 +244,17 @@ private saveStates(params) {
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
+    moodSwitch.each {moodCube ->
+		def moodOn = settings."onoff_${sceneId}_${moodCube.id}" == "true" ? true : false
+		log.info "${moodCube.displayName} is '$moodOn'"
+		if (moodOn) {
+			moodCube.on()
+		}
+		else {
+			moodCube.off()
+		}
+	}
+
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 

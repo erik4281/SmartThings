@@ -57,6 +57,9 @@ def lightSelectPage() {
 		section("Use Hue-containment switch") {
 			input "containment", "capability.switch", title: "Switch", required: false
 		}
+		section("Use MoodCube switch (disable auto-switching light at set times and modes when MoodCube is used)") {
+			input "moodSwitch", "capability.switch", title: "Switch", required: false
+		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
 		}
@@ -248,8 +251,8 @@ private activateHue() {
 		else {
 			light.off()
 		}
-
-		if (type != "switch") {
+        
+		if (type != "switch" && moodOk) {
 			def level = switchLevel(light)
 
 			if (type == "level") {
@@ -331,6 +334,26 @@ private dayString(Date date) {
 		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
 	}
 	df.format(date)
+}
+
+private getMoodOk() {
+	if (moodSwitch) {
+    	if (moodSwitch.currentSwitch == "off") {
+			def result = true
+        	log.trace "Switch is available and off: moodOK = ${result}"
+    		result
+    	}
+        else {
+        	def result = false
+            log.trace "Switch is available and on: moodOK = ${result}"
+            result
+    	}
+    }
+    else {
+    	def result = true
+        log.trace "Switch is NOT available: moodOk = ${result}"
+    	result
+	}
 }
 
 private getAllOk() {
