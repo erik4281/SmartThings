@@ -331,14 +331,14 @@ def addBulbs() {
 			if (bulbs instanceof java.util.Map) {
 				newHueBulb = bulbs.find { (app.id + "/" + it.value.id) == dni }
 				if (newHueBulb?.value?.type?.equalsIgnoreCase("Dimmable light")) {
-					d = addChildDevice("zpriddy", "ZP Hue Lux Bulb", dni, newHueBulb?.value.hub, ["label":newHueBulb?.value.name])
+					d = addChildDevice("erik4281", "EV Hue Lux Bulb", dni, newHueBulb?.value.hub, ["label":newHueBulb?.value.name])
 				} else {
-					d = addChildDevice("zpriddy", "ZP Hue Bulb", dni, newHueBulb?.value.hub, ["label":newHueBulb?.value.name])
+					d = addChildDevice("erik4281", "EV Hue Bulb", dni, newHueBulb?.value.hub, ["label":newHueBulb?.value.name])
 				}
 			} else { 
             	//backwards compatable
 				newHueBulb = bulbs.find { (app.id + "/" + it.id) == dni }
-				d = addChildDevice("zpriddy", "ZP Hue Bulb", dni, newHueBulb?.hub, ["label":newHueBulb?.name])
+				d = addChildDevice("erik4281", "EV Hue Bulb", dni, newHueBulb?.hub, ["label":newHueBulb?.name])
 			}
 
 			log.debug "created ${d.displayName} with id $dni"
@@ -348,7 +348,7 @@ def addBulbs() {
 			if (bulbs instanceof java.util.Map) {
             	def newHueBulb = bulbs.find { (app.id + "/" + it.value.id) == dni }
 				if (newHueBulb?.value?.type?.equalsIgnoreCase("Dimmable light") && d.typeName == "Hue Bulb") {
-					d.setDeviceType("ZP Hue Lux Bulb")
+					d.setDeviceType("EV Hue Lux Bulb")
 				}
 			}
 		}
@@ -365,7 +365,7 @@ def addGroups() {
 			if (groups instanceof java.util.Map) 
 			{
 				newHueGroup = groups.find { (app.id + "/" + it.value.id + "g") == dni }
-				d = addChildDevice("zpriddy", "ZP Hue Group", dni, newHueGroup?.value.hub, ["label":newHueGroup?.value.name])
+				d = addChildDevice("erik4281", "EV Hue Group", dni, newHueGroup?.value.hub, ["label":newHueGroup?.value.name])
 			} 
 
 			log.debug "created ${d.displayName} with id $dni"
@@ -385,7 +385,7 @@ def addBridge() {
 	if(vbridge) {
 		def d = getChildDevice(selectedHue)
 		if(!d) {
-			d = addChildDevice("zpriddy", "ZP Hue Bridge", selectedHue, vbridge.value.hub, ["data":["mac": vbridge.value.mac]]) // ["preferences":["ip": vbridge.value.ip, "port":vbridge.value.port, "path":vbridge.value.ssdpPath, "term":vbridge.value.ssdpTerm]]
+			d = addChildDevice("erik4281", "EV Hue Bridge", selectedHue, vbridge.value.hub, ["data":["mac": vbridge.value.mac]]) // ["preferences":["ip": vbridge.value.ip, "port":vbridge.value.port, "path":vbridge.value.ssdpPath, "term":vbridge.value.ssdpTerm]]
 
 			log.debug "created ${d.displayName} with id ${d.deviceNetworkId}"
 
