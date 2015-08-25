@@ -44,7 +44,9 @@ def lightSelectPage() {
 		section("To switch off these lights (when the switch is OFF)") {
 			//input "lights", "capability.colorControl", multiple: true, required: false, title: "Lights, switches & dimmers"
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
-
+		}
+		section("Transition Time") {
+			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
 		}
 		section("Use Hue-containment switch") {
 			input "containment", "capability.switch", title: "Switch", required: false
@@ -120,7 +122,7 @@ def switchHandler(evt) {
 private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
-	lights.each {light ->
-        light.off()
-	}
+    lights.each {light ->
+        light.off(transitionTime)
+    }
 }
