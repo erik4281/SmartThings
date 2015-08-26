@@ -46,7 +46,7 @@ def lightSelectPage() {
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
 		section("Transition Time") {
-			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
+			input "transitionTime", "number", title: "Seconds", required: false
 		}
 		section("Use Hue-containment switch") {
 			input "containment", "capability.switch", title: "Switch", required: false
@@ -123,6 +123,14 @@ private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
     lights.each {light ->
-        light.off(transitionTime)
+        light.off(transitionTime ?: 1)
     }
 }
+
+//private deactivateHue() {
+//	log.trace "Deactivating!"
+//	state.lastStatus = "off"
+//    lights.each {light ->
+//        light.off(transitionTime)
+//    }
+//}
