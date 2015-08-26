@@ -68,7 +68,7 @@ def scenesPage() {
 			href "scenesPage", title: "Refresh", description: ""
 		}
 		section("Transition Time") {
-			input "transitionTime", "number", title: "Seconds", required: false
+			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
 		}
 		section("Use Hue-containment switch") {
 			input "containment", "capability.switch", title: "Switch"
@@ -274,10 +274,10 @@ private restoreStates(sceneId) {
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
-			light.on(transitionTime ?: 1)
+			light.on(transitionTime)
 		}
 		else {
-			light.off(transitionTime ?: 1)
+			light.off(transitionTime)
 		}
 
 		if (type != "switch") {
@@ -286,7 +286,7 @@ private restoreStates(sceneId) {
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
-					light.setLevel(level, transitiontime: (transitionTime ?: 1))
+					light.setLevel(level, transitionTime)
 				}
 			}
 			else if (type == "color") {
@@ -296,16 +296,16 @@ private restoreStates(sceneId) {
 					def saturation = segs[1].toInteger()
 					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 					if (level != null) {
-						light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: (transitionTime ?: 1))
+						light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: transitionTime)
 					}
 					else {
-						light.setColor(hue: hue, saturation: saturation, transitiontime: (transitionTime ?: 1))
+						light.setColor(hue: hue, saturation: saturation, transitiontime: transitionTime)
 					}
 				}
 				else {
 					log.debug "${light.displayName} level is '$level'"
 					if (level != null) {
-                        light.setLevel(level, transitiontime: (transitionTime ?: 1))
+                        light.setLevel(level, transitionTime)
 					}
 				}
 			}

@@ -47,7 +47,7 @@ def lightSelectPage() {
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
 		section("Transition Time") {
-			input "transitionTime", "number", title: "Seconds", required: false
+			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
 		}
 		section("Timing options") {
 			input "starting", "time", title: "Starting from (also change to this setting when already on...)", required: false
@@ -249,10 +249,10 @@ private activateHue() {
 		def isOn = settings."onoff_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
-			light.on(transitionTime ?: 1)
+			light.on(transitionTime)
 		}
 		else {
-			light.off(transitionTime ?: 1)
+			light.off(transitionTime)
 		}
         
 		if (type != "switch" && moodOk) {
@@ -261,7 +261,7 @@ private activateHue() {
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
-					light.setLevel(level, transitiontime: (transitionTime ?: 1))
+					light.setLevel(level, transitionTime)
 				}
 			}
 			else if (type == "color") {
@@ -271,16 +271,16 @@ private activateHue() {
 					def saturation = segs[1].toInteger()
 					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 					if (level != null) {
-						light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: (transitionTime ?: 1))
+						light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: transitionTime)
 					}
 					else {
-						light.setColor(hue: hue, saturation: saturation, transitiontime: (transitionTime ?: 1))
+						light.setColor(hue: hue, saturation: saturation, transitiontime: transitionTime)
 					}
 				}
 				else {
 					log.debug "${light.displayName} level is '$level'"
 					if (level != null) {
-						light.setLevel(level, transitiontime: (transitionTime ?: 1))
+						light.setLevel(level, transitionTime)
 					}
 				}
 			}
