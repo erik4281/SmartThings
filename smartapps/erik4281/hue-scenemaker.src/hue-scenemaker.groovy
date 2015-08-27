@@ -23,7 +23,7 @@ definition(
     namespace: "erik4281",
     author: "Erik Vennink",
     description: "Switch on and set Hue lights based on an (virtual) switch.",
-    category: "Fun & Social",
+    category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
@@ -43,7 +43,6 @@ def lightSelectPage() {
             input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
         }
 		section("To control these lights") {
-			//input "lights", "capability.colorControl", multiple: true, required: false, title: "Lights, switches & dimmers"
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
 		section("Transition Time") {
@@ -57,9 +56,6 @@ def lightSelectPage() {
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 		}
         section("Lights will also change to these when the mode changes to the selected modes. This only happens when the input switch is enabled!")
-		section("Use Hue-containment switch") {
-			input "containment", "capability.switch", title: "Switch", required: false
-		}
 		section("Use MoodCube switch (disable auto-switching light at set times and modes when MoodCube is used)") {
 			input "moodSwitch", "capability.switch", title: "Switch", required: false
 		}
@@ -141,21 +137,16 @@ def switchHandler(evt) {
     def wait = 25
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    if (containment) {
-		log.info "Containment: ${containment.currentSwitch}"
-	}
 	if (switchValue && allOk) {
         activateHue()
-        if (containment && containment.currentSwitch == "on") {
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-		}
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
 	}
 	else if (switchValue) {
     	log.info "Wrong mode to activate anything"
@@ -172,22 +163,17 @@ def scheduledTimeHandler() {
 	pause(waitStart)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    if (containment) {
-		log.info "Containment: ${containment.currentSwitch}"
-	}
 	if (switchValue && allOk) {
     	log.trace "do it!"
-		activateHue()
-        if (containment && containment.currentSwitch == "on") {
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-		}
+        activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
 	}
     else if (switchValue) {
     	log.info "Wrong mode to activate anything"
@@ -204,22 +190,17 @@ def modeChangeHandler(evt) {
 	pause(waitStart)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    if (containment) {
-		log.info "Containment: ${containment.currentSwitch}"
-	}
 	if (switchValue && allOk) {
     	log.trace "do it!"
-		activateHue()
-        if (containment && containment.currentSwitch == "on") {
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-	        pause(wait)
-    	    activateHue()
-		}
+        activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
+	    pause(wait)
+    	activateHue()
 	}
     else if (switchValue) {
     	log.info "Wrong mode to activate anything"

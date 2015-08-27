@@ -23,7 +23,7 @@ definition(
     namespace: "erik4281",
     author: "Erik Vennink",
     description: "Change the presence mode of a Nest thermostat based on the presence of (multiple) presence sensor(s) or phones.",
-    category: "Convenience",
+    category: "SmartThings Labs",
     iconUrl: "http://icons.iconarchive.com/icons/iconshock/vector-twitter/128/twitter-nest-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/iconshock/vector-twitter/128/twitter-nest-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/iconshock/vector-twitter/128/twitter-nest-icon.png")

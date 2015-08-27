@@ -23,7 +23,7 @@ definition(
     namespace: "erik4281",
     author: "Erik Vennink",
     description: "Automatically set mode to sleep or day/night in the evening and morning, based on motion sensors. ",
-    category: "Convenience",
+    category: "SmartThings Labs",
     iconUrl: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png")

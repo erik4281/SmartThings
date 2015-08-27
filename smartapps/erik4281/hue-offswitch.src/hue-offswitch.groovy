@@ -23,7 +23,7 @@ definition(
     namespace: "erik4281",
     author: "Erik Vennink",
     description: "Switch off Hue lights based on an (virtual) switch.",
-    category: "Fun & Social",
+    category: "Green Living",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
@@ -42,14 +42,10 @@ def lightSelectPage() {
             input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
         }
 		section("To switch off these lights (when the switch is OFF)") {
-			//input "lights", "capability.colorControl", multiple: true, required: false, title: "Lights, switches & dimmers"
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
 		section("Transition Time") {
 			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
-		}
-		section("Use Hue-containment switch") {
-			input "containment", "capability.switch", title: "Switch", required: false
 		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
@@ -93,25 +89,20 @@ def switchHandler(evt) {
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
     def waitStart = 25
     def wait = 25
-    if (containment) {
-		log.info "Containment: ${containment.currentSwitch}"
-	}
     pause(waitStart)
 	if (switchValue) {
     	log.info "Wrong mode to activate anything"
     }
 	else {
         deactivateHue()
-        if (containment && containment.currentSwitch == "on") {
-            pause(wait)
-        	deactivateHue()
-            pause(wait)
-        	deactivateHue()
-            pause(wait)
-        	deactivateHue()
-            pause(wait)
-        	deactivateHue()
-        }
+        pause(wait)
+       	deactivateHue()
+		pause(wait)
+        deactivateHue()
+        pause(wait)
+        deactivateHue()
+        pause(wait)
+        deactivateHue()
     }
 }
 

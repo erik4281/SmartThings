@@ -23,7 +23,7 @@ definition(
 	namespace: "erik4281",
 	author: "Erik Vennink",
 	description: "Set your lighting by rotating a cube containing a SmartSense Multi.",
-	category: "Convenience",
+	category: "SmartThings Labs",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/App-LightUpMyWorld.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/App-LightUpMyWorld@2x.png"
 )
@@ -69,9 +69,6 @@ def scenesPage() {
 		}
 		section("Transition Time") {
 			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
-		}
-		section("Use Hue-containment switch") {
-			input "containment", "capability.switch", title: "Switch"
 		}
 		section("Use MoodCube switch (disable auto-switching light at set times and modes when MoodCube is used)") {
 			input "moodSwitch", "capability.switch", title: "Switch", required: false
@@ -183,9 +180,6 @@ def positionHandler(evt) {
 
 	def sceneId = getOrientation(evt.xyzValue)
 	def wait = 25
-    if (containment) {
-		log.info "Containment: ${containment.currentSwitch}"
-	}
 	if (switches) { 
     	switches.on () 
         log.trace "Switches switched on"
@@ -193,8 +187,6 @@ def positionHandler(evt) {
 	log.trace "orientation: $sceneId"
 
 	if (sceneId != state.lastActiveSceneId) {
-		//sendNotificationEvent("MoodCube set to ${sceneName(sceneId)}")
-
 	    moodSwitch.each {moodCube ->
 			def moodOn = settings."onoff_${sceneId}_${moodCube.id}" == "true" ? true : false
 			log.info "${moodCube.displayName} is '$moodOn'"
@@ -207,17 +199,15 @@ def positionHandler(evt) {
 		}
 
 		restoreStates(sceneId)
-        if (containment && containment.currentSwitch == "on") {
-			pause(wait)
-			restoreStates(sceneId)
-			pause(wait)
-			restoreStates(sceneId)
-			pause(wait)
-			restoreStates(sceneId)
-			pause(wait)
-			restoreStates(sceneId)
-		}
-        
+		pause(wait)
+		restoreStates(sceneId)
+		pause(wait)
+		restoreStates(sceneId)
+		pause(wait)
+		restoreStates(sceneId)
+		pause(wait)
+		restoreStates(sceneId)
+
 	}
 	else {
 		log.trace "No status change"

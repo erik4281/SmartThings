@@ -23,7 +23,7 @@ definition(
     namespace: "erik4281",
     author: "Erik Vennink",
     description: "Control the set mode based on presence sensors and sunrise/sunset.",
-    category: "Convenience",
+    category: "SmartThings Labs",
     iconUrl: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png")
