@@ -253,18 +253,18 @@ def illuminanceHandler(evt) {
             deactivateSwitch()
         }
         else if (state.motionStopTime) {
-            log.debug "Timer is running (so no motion at the moment"
+            log.debug "Timer is running (so no motion at the moment)"
             if (state.lastStatus != "off") {
                 log.debug "State is on"
                 def elapsed = now() - state.motionStopTime                
 			    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
- 			       log.debug "Short delay started"
+ 			       log.debug "Switch off within short delay time"
                    if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
 			        	deactivateSwitch()
                     }
 			    }
 				else if(delayMinutes) {
-                	log.debug "Normal delay started"
+                	log.debug "Switch off within normal delay time"
                     if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
                     	deactivateSwitch()
                     }
