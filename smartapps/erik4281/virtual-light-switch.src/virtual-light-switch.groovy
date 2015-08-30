@@ -24,7 +24,6 @@ definition(
     author: "Erik Vennink",
     description: "Use this app to create virtual light switches, which can be activated by motion or open/close sensors. These switches can be used to control lights with a separate app. ",
     category: "Safety & Security",
-    //category: "Convenience",
     iconUrl: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
     iconX3Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png")
@@ -59,13 +58,10 @@ def switchPage() {
 			input "lightOffValue", "number", title: "Off at > (Lux, empty = 150)?", required: false
 		}
 		section("Short-delay-mode (for example sleep...)") {
-			input "sleepModes", "mode", title: "Which mode(s)", required: false, multiple: true
-			input "sleepDelayMinutes", "number", title: "Off after x minutes", required: false
-		}
-		section("Short-delay-times (for example daytime...)") {
+			input "shortModes", "mode", title: "In which mode(s)", required: false, multiple: true
+			input "shortStarting", "time", title: "And starting from", required: false
+			input "shortEnding", "time", title: "And ending at", required: false
 			input "shortDelayMinutes", "number", title: "Off after x minutes", required: false
-			input "shortStarting", "time", title: "Starting from", required: false
-			input "shortEnding", "time", title: "Ending at", required: false
 		}
 	}
 }
@@ -73,7 +69,7 @@ def switchPage() {
 def optionsPage() {
 	dynamicPage(name: "optionsPage") {
         section("Control these switches") {
-            input "switch1", "capability.switch", title: "Which switches?", required:true, multiple:true
+            input "switching", "capability.switch", title: "Which switches?", required:true, multiple:true
         }
 		section("Timing options") {
 			input "starting", "time", title: "Starting from", required: false
@@ -137,13 +133,9 @@ def appTouchHandler(evt) {
 	else {
     	state.motionStopTime = now()
     }
-    if(sleepModeOk && sleepDelayMinutes) {
-        runIn(sleepDelayMinutes*60, turnOffMotionAfterDelaySleep, [overwrite: false])
-        log.info "Delay: $sleepDelayMinutes minutes"
-    }
-    else if(shortTimeOk && shortDelayMinutes) {
+    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
         runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-        log.info "Delay: $shortDelayMinutes minutes"
+        log.info "Delay: $sleepDelayMinutes minutes"
     }
     else if(delayMinutes) {
         runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
@@ -167,13 +159,9 @@ def motionHandler(evt) {
         }
         else {
             state.motionStopTime = now()
-			if(sleepModeOk && sleepDelayMinutes) {
-                runIn(sleepDelayMinutes*60, turnOffMotionAfterDelaySleep, [overwrite: false])
-                log.info "Delay Sleep (motion): $sleepDelayMinutes minutes"
-            }
-		    else if(shortTimeOk && shortDelayMinutes) {
+		    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 		        runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-		        log.info "Delay Short (motion): $shortDelayMinutes minutes"
+		        log.info "Delay: $sleepDelayMinutes minutes"
 		    }
             else if(delayMinutes) {
                 runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
@@ -209,13 +197,9 @@ def contactHandler(evt) {
         }
         else {
             state.motionStopTime = now()
-			if(sleepModeOk && sleepDelayMinutes) {
-                runIn(sleepDelayMinutes*60, turnOffMotionAfterDelaySleep, [overwrite: false])
-                log.info "Delay Sleep (contact): $sleepDelayMinutes minutes"
-            }
-		    else if(shortTimeOk && shortDelayMinutes) {
+		    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 		        runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-		        log.info "Delay Short (contact): $shortDelayMinutes minutes"
+		        log.info "Delay: $sleepDelayMinutes minutes"
 		    }
             else if(delayMinutes) {
                 runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
@@ -250,16 +234,11 @@ def illuminanceHandler(evt) {
         else if (state.motionStopTime) {
             if (state.lastStatus != "off") {
                 def elapsed = now() - state.motionStopTime                
-				if(sleepModeOk && sleepDelayMinutes) {
-                	if (elapsed >= ((sleepDelayMinutes ?: 0) * 60000L) - 2000) {
-                	    deactivateSwitch()
-                	}
-                }
-                else if(shortTimeOk && shortDelayMinutes) {
-                	if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
-                	    deactivateSwitch()
-                	}
-                }
+			    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+ 			       if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+			        	deactivateSwitch()
+                    }
+			    }
 				else if(delayMinutes) {
                 	if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
                     	deactivateSwitch()
@@ -306,16 +285,6 @@ def turnOffMotionAfterDelay() {
 	}
 }
 
-def turnOffMotionAfterDelaySleep() {
-	log.trace "In turnOffMotionAfterDelaySleep, state.motionStopTime = $state.motionStopTime, state.lastStatus = $state.lastStatus"
-	if (state.motionStopTime && state.lastStatus != "off") {
-		def elapsed = now() - state.motionStopTime
-        if (elapsed >= ((sleepDelayMinutes ?: 0) * 60000L) - 2000) {
-        	deactivateSwitch()
-		}
-	}
-}
-
 def turnOffMotionAfterDelayShort() {
 	log.trace "In turnOffMotionAfterDelayShort, state.motionStopTime = $state.motionStopTime, state.lastStatus = $state.lastStatus"
 	if (state.motionStopTime && state.lastStatus != "off") {
@@ -327,19 +296,19 @@ def turnOffMotionAfterDelayShort() {
 }
 
 def activateSwitch() {
-	def current = switch1.currentValue('switch')
-	def switchValue = switch1.find{it.currentSwitch == "off"}
+	def current = switching.currentValue('switch')
+	def switchValue = switching.find{it.currentSwitch == "off"}
     if (switchValue) {
-        startSwitch(switch1)
+        startSwitch(switching)
     }
 	state.lastStatus = "on"
 }
 
 def deactivateSwitch() {
-	def current = switch1.currentValue('switch')
-	def switchValue = switch1.find{it.currentSwitch == "on"}
+	def current = switching.currentValue('switch')
+	def switchValue = switching.find{it.currentSwitch == "on"}
     if (switchValue) {
-        stopSwitch(switch1)
+        stopSwitch(switching)
     }
     state.lastStatus = "off"
 }
@@ -399,9 +368,9 @@ private getModeOk() {
 	result
 }
 
-private getSleepModeOk() {
-	def result = !sleepModes || sleepModes.contains(location.mode)
-	log.trace "sleepModeOk = $result"
+private getShortModeOk() {
+	def result = !shortModes || shortModes.contains(location.mode)
+	log.trace "shortModeOk = $result"
 	result
 }
 
