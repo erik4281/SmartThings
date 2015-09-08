@@ -40,9 +40,6 @@ preferences {
 		section("To control these lights") {
 			input "lights", "capability.switch", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
-		section("AutoSwitching these Auto-switches") {
-			input "switches", "capability.switch", multiple: true, required: false, title: "Switches"
-		}        
 		section([title: " ", mobileOnly:true]) {
 			label title: "Assign a name", required: false
 			mode title: "Set for specific mode(s)", required: false
@@ -67,12 +64,6 @@ def scenesPage() {
 		section {
 			href "scenesPage", title: "Refresh", description: ""
 		}
-		section("Transition Time") {
-			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
-		}
-		section("Use MoodCube switch (disable auto-switching light at set times and modes when MoodCube is used)") {
-			input "moodSwitch", "capability.switch", title: "Switch", required: false
-		}
 	}
 }
 
@@ -85,23 +76,17 @@ def scenePage(params=[:]) {
 		section {
 			input "sceneName${sceneId}", "text", title: "Scene Name", required: false
 		}
-
+		section {
+			input "sceneMode_${sceneId}", "mode", title: "Change mode to?", required: false
+		}
 		section {
 			href "devicePage", title: "Show Device States", params: [sceneId:sceneId], description: "", state: sceneIsDefined(sceneId) ? "complete" : "incomplete"
 		}
-		section("MoodSwitch") {
-			moodSwitch.each {moodCube ->
-				input "onoff_${sceneId}_${moodCube.id}", "boolean", title: moodCube.displayName
-			}
-		}
-
-
 		if (sceneId == currentSceneId) {
 			section {
 				href "saveStatesPage", title: "Record Current Device States", params: [sceneId:sceneId], description: ""
 			}
 		}
-
 	}
 }
 
@@ -118,7 +103,6 @@ def devicePage(params) {
 				input "onoff_${sceneId}_${light.id}", "boolean", title: light.displayName
 			}
 		}
-
 		section("Dimmers") {
 			lights.each {light ->
 				if (state.lightCapabilities[light.id] in ["level", "color"]) {
@@ -126,7 +110,6 @@ def devicePage(params) {
 				}
 			}
 		}
-
 		section("Colors (hue/saturation)") {
 			lights.each {light ->
 				if (state.lightCapabilities[light.id] == "color") {
@@ -179,35 +162,9 @@ def initialize() {
 def positionHandler(evt) {
 
 	def sceneId = getOrientation(evt.xyzValue)
-	def wait = 25
-	if (switches) { 
-    	switches.on () 
-        log.trace "Switches switched on"
-    }
 	log.trace "orientation: $sceneId"
-
 	if (sceneId != state.lastActiveSceneId) {
-	    moodSwitch.each {moodCube ->
-			def moodOn = settings."onoff_${sceneId}_${moodCube.id}" == "true" ? true : false
-			log.info "${moodCube.displayName} is '$moodOn'"
-			if (moodOn) {
-				moodCube.on()
-			}
-			else {
-				moodCube.off()
-			}
-		}
-
 		restoreStates(sceneId)
-		pause(wait)
-		restoreStates(sceneId)
-		pause(wait)
-		restoreStates(sceneId)
-		pause(wait)
-		restoreStates(sceneId)
-		pause(wait)
-		restoreStates(sceneId)
-
 	}
 	else {
 		log.trace "No status change"
@@ -257,17 +214,24 @@ private saveStates(params) {
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
-
+	def setScene = settings."sceneMode_${sceneId}"
+	if (setScene) {
+		log.debug "Home-mode set to '${setScene}'."
+		if (location.mode != setScene) {
+			sendNotificationEvent("Home-mode set to '${setScene}'.")
+		}
+		changeMode(setScene)
+	}
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
-			light.on(transitionTime)
+			light.on()
 		}
 		else {
-			light.off(transitionTime)
+			light.off()
 		}
 
 		if (type != "switch") {
@@ -276,7 +240,7 @@ private restoreStates(sceneId) {
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
-					light.setLevel(level, transitionTime)
+					light.setLevel(level)
 				}
 			}
 			else if (type == "color") {
@@ -286,16 +250,16 @@ private restoreStates(sceneId) {
 					def saturation = segs[1].toInteger()
 					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 					if (level != null) {
-						light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: transitionTime)
+						light.setColor(level: level, hue: hue, saturation: saturation)
 					}
 					else {
-						light.setColor(hue: hue, saturation: saturation, transitiontime: transitionTime)
+						light.setColor(hue: hue, saturation: saturation)
 					}
 				}
 				else {
 					log.debug "${light.displayName} level is '$level'"
 					if (level != null) {
-                        light.setLevel(level, transitionTime)
+						light.setLevel(level)
 					}
 				}
 			}
