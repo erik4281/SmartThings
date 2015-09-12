@@ -256,8 +256,7 @@ private activateHue() {
 			}
 			else if (type == "color") {
 				//def segs = settings."color_${light.id}"?.split("/")
-				def segs = settings."color_${light.id}"
-                //if (segs?.size() == 2) {
+				//if (segs?.size() == 2) {
 					//def hue = segs[0].toInteger()
 					//def saturation = segs[1].toInteger()
                     
