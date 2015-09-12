@@ -79,20 +79,26 @@ def optionsPage(params) {
 		}
 		section("Colors (hue/saturation)") {
 			lights.each {light ->
-				input "color_${light.id}", "text", title: light.displayName, description: "", required: false
+				//input "color_${light.id}", "text", title: light.displayName, description: "", required: false
+				input "color_${light.id}", "enum", title: light.displayName, required: false, multiple:false, options: [
+					["Soft White":"Soft White - Default"],
+					["White":"White - Concentrate"],
+					["Daylight":"Daylight - Energize"],
+					["Warm White":"Warm White - Relax"],
+					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
 			}
 		}
-		section("Soft white: (23/56)") 
-		section("White: (52/19)") 
-		section("Daylight: (53/91)") 
-		section("Warm white: (20/80)") 
-		section("Orange: (10/100)") 
-		section("Yellow: (25/100)") 
-		section("Green: (39/100)") 
-		section("Blue: (70/100)") 
-		section("Purple: (75/100)") 
-		section("Pink: (83/100)") 
-		section("Red: (100/100)") 
+		//section("Soft white: (23/56)") 
+		//section("White: (52/19)") 
+		//section("Daylight: (53/91)") 
+		//section("Warm white: (20/80)") 
+		//section("Orange: (10/100)") 
+		//section("Yellow: (25/100)") 
+		//section("Green: (39/100)") 
+		//section("Blue: (70/100)") 
+		//section("Purple: (75/100)") 
+		//section("Pink: (83/100)") 
+		//section("Red: (100/100)") 
 	}
 }
 
@@ -249,32 +255,91 @@ private activateHue() {
 				}
 			}
 			else if (type == "color") {
-				def segs = settings."color_${light.id}"?.split("/")
-				if (segs?.size() == 2) {
-					def hue = segs[0].toInteger()
-					def saturation = segs[1].toInteger()
-					log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
-					if (level != null) {
-						light.setColor(level: level, hue: hue, saturation: saturation)
-                        //light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: transitionTime)
-					}
-					else {
-						light.setColor(hue: hue, saturation: saturation)
-                        //light.setColor(hue: hue, saturation: saturation, transitiontime: transitionTime)
-					}
+				//def segs = settings."color_${light.id}"?.split("/")
+				def segs = settings."color_${light.id}"
+                //if (segs?.size() == 2) {
+					//def hue = segs[0].toInteger()
+					//def saturation = segs[1].toInteger()
+                    
+				def hue = 23
+				def saturation = 56
+				
+                log.info settings."color_${light.id}"
+				switch(settings."color_${light.id}") {
+					case "White":
+						hue = 52
+						saturation = 19
+						break;
+					case "Daylight":
+						hue = 53
+						saturation = 91
+						break;
+					case "Soft White":
+						hue = 23
+						saturation = 56
+						break;
+					case "Warm White":
+						hue = 20
+						saturation = 80 //83
+						break;
+					case "Blue":
+						hue = 70
+			            saturation = 100
+						break;
+					case "Green":
+						hue = 39
+			            saturation = 100
+						break;
+					case "Yellow":
+						hue = 25
+			            saturation = 100
+						break;
+					case "Orange":
+						hue = 10
+			            saturation = 100
+						break;
+					case "Purple":
+						hue = 75
+			            saturation = 100
+						break;
+					case "Pink":
+						hue = 83
+			            saturation = 100
+						break;
+					case "Red":
+						hue = 100
+			            saturation = 100
+						break;
+				}
+
+                    
+                    
+                    
+                    
+                    
+				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
+				if (level != null) {
+					light.setColor(level: level, hue: hue, saturation: saturation)
+                    //light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: transitionTime)
 				}
 				else {
-					log.debug "${light.displayName} level is '$level'"
-					if (level != null) {
-						light.setLevel(level)
-                        //light.setLevel(level, transitionTime)
-					}
+					light.setColor(hue: hue, saturation: saturation)
+                    //light.setColor(hue: hue, saturation: saturation, transitiontime: transitionTime)
 				}
 			}
 			else {
-				log.error "Unknown type '$type'"
+				log.debug "${light.displayName} level is '$level'"
+				if (level != null) {
+					light.setLevel(level)
+                    //light.setLevel(level, transitionTime)
+				}
 			}
+		}	
+            
+		else {
+			log.error "Unknown type '$type'"
 		}
+		
 	}
 }
 
