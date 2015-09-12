@@ -79,9 +79,6 @@ def scenePage(params=[:]) {
 		section {
 			input "sceneName${sceneId}", "text", title: "Scene Name", required: false
 		}
-		//section {
-		//	input "sceneMode_${sceneId}", "mode", title: "Change mode to?", required: false
-		//}
 		section("MoodSwitch") {
 			moodSwitch.each {moodCube ->
 				input "onoff_${sceneId}_${moodCube.id}", "boolean", title: moodCube.displayName
@@ -100,11 +97,8 @@ def scenePage(params=[:]) {
 
 def devicePage(params) {
 	log.debug "devicePage($params)"
-
 	getDeviceCapabilities()
-
 	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
-
 	dynamicPage(name:"devicePage", title: "${sceneId}. ${sceneName(sceneId)} Device States") {
 		section("Lights") {
 			lights.each {light ->
@@ -121,7 +115,6 @@ def devicePage(params) {
 		section("Colors (hue/saturation)") {
 			lights.each {light ->
 				if (state.lightCapabilities[light.id] == "color") {
-					//input "color_${sceneId}_${light.id}", "text", title: light.displayName, description: "", required: false
 					input "color_${sceneId}_${light.id}", "enum", title: light.displayName, required: false, multiple:false, options: [
 						["Soft White":"Soft White - Default"],
 						["White":"White - Concentrate"],
@@ -131,17 +124,6 @@ def devicePage(params) {
 				}
 			}
 		}
-		//section("Soft white: (23/56)") 
-		//section("White: (52/19)") 
-		//section("Daylight: (53/91)") 
-		//section("Warm white: (20/80)") 
-		//section("Orange: (10/100)") 
-		//section("Yellow: (25/100)") 
-		//section("Green: (39/100)") 
-		//section("Blue: (70/100)") 
-		//section("Purple: (75/100)") 
-		//section("Pink: (83/100)") 
-		//section("Red: (100/100)") 
 	}
 }
 
@@ -218,12 +200,9 @@ private saveStates(params) {
 	log.trace "saveStates($params)"
 	def sceneId = params.sceneId as Integer
 	getDeviceCapabilities()
-
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
-
 		updateSetting("onoff_${sceneId}_${light.id}", light.currentValue("switch") == "on")
-
 		if (type == "level") {
 			updateSetting("level_${sceneId}_${light.id}", closestLevel(light.currentValue('level')))
 		}
@@ -233,7 +212,6 @@ private saveStates(params) {
 		}
 	}
 }
-
 
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
@@ -248,7 +226,6 @@ private restoreStates(sceneId) {
 	}
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
-
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
@@ -257,10 +234,8 @@ private restoreStates(sceneId) {
 		else {
 			light.off()
 		}
-
 		if (type != "switch") {
 			def level = switchLevel(sceneId, light)
-
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
@@ -268,14 +243,8 @@ private restoreStates(sceneId) {
 				}
 			}
 			else if (type == "color") {
-				//def segs = settings."color_${sceneId}_${light.id}"?.split("/")
-				//if (segs?.size() == 2) {
-					//def hue = segs[0].toInteger()
-					//def saturation = segs[1].toInteger()
-                    
 				def hue = 23
-				def saturation = 56
-				
+				def saturation = 56				
                 log.info settings."color_${sceneId}_${light.id}"
 				switch(settings."color_${sceneId}_${light.id}") {
 					case "White":
@@ -323,9 +292,6 @@ private restoreStates(sceneId) {
 			            saturation = 100
 						break;
 				}
-
-                    
-                    
 				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
                 if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
@@ -384,13 +350,10 @@ private getLevels() {
 
 private getOrientation(xyz=null) {
 	final threshold = 250
-
 	def value = xyz ?: cube.currentValue("threeAxis")
-
 	def x = Math.abs(value.x) > threshold ? (value.x > 0 ? 1 : -1) : 0
 	def y = Math.abs(value.y) > threshold ? (value.y > 0 ? 1 : -1) : 0
 	def z = Math.abs(value.z) > threshold ? (value.z > 0 ? 1 : -1) : 0
-
 	def orientation = 6
 	if (z > 0) {
 		if (x == 0 && y == 0) {
@@ -422,7 +385,6 @@ private getOrientation(xyz=null) {
 			}
 		}
 	}
-
 	orientation
 }
 

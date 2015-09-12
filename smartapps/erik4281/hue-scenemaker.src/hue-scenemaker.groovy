@@ -45,9 +45,6 @@ def lightSelectPage() {
 		section("To control these lights") {
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
-		//section("Transition Time") {
-		//	input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
-		//}
 		section("Timing options") {
 			input "starting", "time", title: "Starting from (also change to this setting when already on...)", required: false
 			input "ending", "time", title: "Ending at", required: false
@@ -79,7 +76,6 @@ def optionsPage(params) {
 		}
 		section("Colors (hue/saturation)") {
 			lights.each {light ->
-				//input "color_${light.id}", "text", title: light.displayName, description: "", required: false
 				input "color_${light.id}", "enum", title: light.displayName, required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
 					["White":"White - Concentrate"],
@@ -88,17 +84,6 @@ def optionsPage(params) {
 					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
 			}
 		}
-		//section("Soft white: (23/56)") 
-		//section("White: (52/19)") 
-		//section("Daylight: (53/91)") 
-		//section("Warm white: (20/80)") 
-		//section("Orange: (10/100)") 
-		//section("Yellow: (25/100)") 
-		//section("Green: (39/100)") 
-		//section("Blue: (70/100)") 
-		//section("Purple: (75/100)") 
-		//section("Pink: (83/100)") 
-		//section("Red: (100/100)") 
 	}
 }
 
@@ -140,19 +125,10 @@ def appTouchHandler(evt) {
 
 def switchHandler(evt) {
 	log.trace "switchHandler()"
-    //def wait = 25
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
         activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
 	}
 	else if (switchValue) {
     	log.info "Wrong mode to activate anything"
@@ -164,22 +140,11 @@ def switchHandler(evt) {
 
 def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
-    //def waitStart = 2500
-    //def wait = 25
-	//pause(waitStart)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
     	log.trace "do it!"
         activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
 	}
     else if (switchValue) {
     	log.info "Wrong mode to activate anything"
@@ -191,22 +156,11 @@ def scheduledTimeHandler() {
 
 def modeChangeHandler(evt) {
 	log.trace "modeChangeHandler()"
-    //def waitStart = 2500
-    //def wait = 25
-	//pause(waitStart)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
     	log.trace "do it!"
         activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
-	    //pause(wait)
-    	//activateHue()
 	}
     else if (switchValue) {
     	log.info "Wrong mode to activate anything"
@@ -227,42 +181,28 @@ private closestLevel(level) {
 private activateHue() {
 	log.trace "Activating!"
 	state.lastStatus = "on"
-
 	getDeviceCapabilities()
-	
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
-
 		def isOn = settings."onoff_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
 			light.on()
-			//light.on(transitionTime)
 		}
 		else {
 			light.off()
-            //light.off(transitionTime)
 		}
-        
 		if (type != "switch" && moodOk) {
 			def level = switchLevel(light)
-
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(level)
-                    //light.setLevel(level, transitionTime)
 				}
 			}
 			else if (type == "color") {
-				//def segs = settings."color_${light.id}"?.split("/")
-				//if (segs?.size() == 2) {
-					//def hue = segs[0].toInteger()
-					//def saturation = segs[1].toInteger()
-                    
 				def hue = 23
 				def saturation = 56
-				
                 log.info settings."color_${light.id}"
 				switch(settings."color_${light.id}") {
 					case "White":
@@ -310,35 +250,24 @@ private activateHue() {
 			            saturation = 100
 						break;
 				}
-
-                    
-                    
-                    
-                    
-                    
 				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 				if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
-                    //light.setColor(level: level, hue: hue, saturation: saturation, transitiontime: transitionTime)
 				}
 				else {
 					light.setColor(hue: hue, saturation: saturation)
-                    //light.setColor(hue: hue, saturation: saturation, transitiontime: transitionTime)
 				}
 			}
 			else {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(level)
-                    //light.setLevel(level, transitionTime)
 				}
 			}
 		}	
-            
 		else {
 			log.error "Unknown type '$type'"
-		}
-		
+		}		
 	}
 }
 
