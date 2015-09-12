@@ -74,7 +74,7 @@ def optionsPage(params) {
 				input "level_${light.id}", "enum", title: light.displayName, options: levels, description: "", required: false
 			}
 		}
-		section("Colors (hue/saturation)") {
+		section("Colors") {
 			lights.each {light ->
 				input "color_${light.id}", "enum", title: light.displayName, required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
