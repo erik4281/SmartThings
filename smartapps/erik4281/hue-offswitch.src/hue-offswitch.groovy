@@ -44,9 +44,9 @@ def lightSelectPage() {
 		section("To switch off these lights (when the switch is OFF)") {
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
-		section("Transition Time") {
-			input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
-		}
+		//section("Transition Time") {
+		//	input "transitionTime", "number", title: "Seconds (set to 1 if no delay needed)", required: true
+		//}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
 		}
@@ -87,22 +87,22 @@ def switchHandler(evt) {
 	log.trace "switchHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-    def waitStart = 25
-    def wait = 25
-    pause(waitStart)
+    //def waitStart = 25
+    //def wait = 25
+    //pause(waitStart)
 	if (switchValue) {
     	log.info "Wrong mode to activate anything"
     }
 	else {
         deactivateHue()
-        pause(wait)
-       	deactivateHue()
-		pause(wait)
-        deactivateHue()
-        pause(wait)
-        deactivateHue()
-        pause(wait)
-        deactivateHue()
+        //pause(wait)
+       	//deactivateHue()
+		//pause(wait)
+        //deactivateHue()
+        //pause(wait)
+        //deactivateHue()
+        //pause(wait)
+        //deactivateHue()
     }
 }
 
@@ -114,6 +114,7 @@ private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
     lights.each {light ->
-        light.off(transitionTime)
+        light.off()
+        //light.off(transitionTime)
     }
 }
