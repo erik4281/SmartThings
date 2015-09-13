@@ -53,7 +53,7 @@ def lightSelectPage() {
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 		}
         section("Lights will also change to these when the mode changes to the selected modes. This only happens when the input switch is enabled!")
-		section("Use MoodCube switch (disable auto-switching light at set times and modes when MoodCube is used)") {
+		section("Use MoodCube switch (disable auto-switching light)") {
 			input "moodSwitch", "capability.switch", title: "Switch", required: false
 		}
 		section([mobileOnly:true]) {
