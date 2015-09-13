@@ -292,7 +292,7 @@ def contactHandler(evt) {
 
 def illuminanceHandler(evt) {
 	log.trace "illuminanceHandler()"
-    if (allOk) {
+    if (modeOk && daysOk && timeOk) {
     	log.debug "allOk"
         log.info "state.lastStatus: $state.lastStatus"
         log.info "evt.integerValue: $evt.integerValue"
