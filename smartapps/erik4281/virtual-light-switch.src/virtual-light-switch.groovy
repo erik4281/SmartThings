@@ -42,7 +42,8 @@ def switchPage() {
         section("Monitor sensors..."){
             input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
             input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
-			input "delayMinutes", "number", title: "Off after x minutes", required: false
+			input "inputSwitch", "capability.switch", title: "Switches (using short-delay time)", required: true, multiple: true
+            input "delayMinutes", "number", title: "Off after x minutes", required: false
         }
         section("Switch ON..."){
             input "triggerModes", "mode", title: "System Changes Mode", required: false, multiple: true
@@ -104,6 +105,7 @@ def subscribeToEvents() {
 	subscribe(app, appTouchHandler)
 	subscribe(motionSensor, "motion", motionHandler)
 	subscribe(contactSensor, "contact", contactHandler)
+	subscribe(inputSwitch, "switch", switchHandler)
 	if (lightSensor) {
 		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])
 	}
@@ -144,6 +146,28 @@ def appTouchHandler(evt) {
         runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
         log.info "Delay: $delayMinutes minutes"
 	} 
+	else {
+		log.debug "Backup scenario started"
+        turnOffMotionAfterDelay()
+	}
+}
+
+def switchHandler(evt) {
+	log.trace "switchHandler()"
+	def current = inputSwitch.currentValue('switch')
+	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
+	if (switchValue) {
+    	log.debug "motionValue = true"
+		state.motionStopTime = null
+	}
+	else {
+    	state.motionStopTime = now()
+    }
+    if(shortDelayMinutes) {
+        log.debug "Short delay started"
+        runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
+        log.info "Delay short: $shortDelayMinutes minutes"
+    }
 	else {
 		log.debug "Backup scenario started"
         turnOffMotionAfterDelay()
