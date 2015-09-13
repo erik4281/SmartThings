@@ -42,7 +42,7 @@ def switchPage() {
         section("Monitor sensors..."){
             input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
             input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
-			input "inputSwitch", "capability.switch", title: "Switches (using short-delay time)", required: true, multiple: true
+			input "inputSwitch", "capability.switch", title: "Switches (using short-delay time)", required: false, multiple: true
             input "delayMinutes", "number", title: "Off after x minutes", required: false
         }
         section("Switch ON..."){
@@ -156,7 +156,12 @@ def switchHandler(evt) {
 	log.trace "switchHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue) {
+	if (switchValue && allOkExtra) {
+    	log.debug "motionValue = true"
+		activateSwitch()
+        state.motionStopTime = null
+	}
+	else if (switchValue) {
     	log.debug "motionValue = true"
 		state.motionStopTime = null
 	}
@@ -206,7 +211,7 @@ def motionHandler(evt) {
             }
         }
     }
-    else {
+    else if (switchOk) {
         if (motionValue) {
             state.motionStopTime = null
             log.debug "Timer stopped"
@@ -216,6 +221,16 @@ def motionHandler(evt) {
             log.debug "Backup scenario started"
             runIn(30*60, turnOffMotionAfterDelay, [overwrite: false])
             log.info "Delay (motion): 30 minutes (backup off switch)"
+        }
+    }
+    else {
+        if (motionValue) {
+            state.motionStopTime = null
+            log.debug "Timer stopped"
+        }
+        else {
+            state.motionStopTime = now()
+            log.debug "Backup scenario started"
         }
     }
 }
@@ -251,8 +266,8 @@ def contactHandler(evt) {
             }
         }
     }
-    else {
-        if (contactValue) {
+    else if (switchOk) {
+        if (motionValue) {
             state.motionStopTime = null
             log.debug "Timer stopped"
         }
@@ -260,7 +275,17 @@ def contactHandler(evt) {
             state.motionStopTime = now()
             log.debug "Backup scenario started"
             runIn(30*60, turnOffMotionAfterDelay, [overwrite: false])
-            log.info "Delay (contact): 30 minutes (backup off switch)"
+            log.info "Delay (motion): 30 minutes (backup off switch)"
+        }
+    }
+    else {
+        if (motionValue) {
+            state.motionStopTime = null
+            log.debug "Timer stopped"
+        }
+        else {
+            state.motionStopTime = now()
+            log.debug "Backup scenario started"
         }
     }
 }
@@ -405,7 +430,28 @@ private getAllOkExtra() {
 }
 
 private getAllOk() {
-	modeOk && daysOk && timeOk
+	modeOk && daysOk && timeOk && switchOk
+}
+
+private getSwitchOk() {
+	def result = true
+	if (inputSwitch) {
+    	//log.debug "inputswitch present"
+    	def current = inputSwitch.currentValue('switch')
+		def switchValue = inputSwitch.find{it.currentSwitch == "on"}
+		if (switchValue) {
+    		result = false
+        }
+        else {
+        	result = true
+        }
+    }
+    else {
+    	//log.debug "no inputswitch"
+    	result = true
+    }
+    log.trace "switchOk = $result"
+    result
 }
 
 private getDarkOk() {
