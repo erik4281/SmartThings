@@ -296,7 +296,7 @@ def illuminanceHandler(evt) {
     	log.debug "allOk"
         log.info "state.lastStatus: $state.lastStatus"
         log.info "evt.integerValue: $evt.integerValue"
-        log.info "state.actionStopTime: $state.actionStopTime"
+        log.info "state.motionStopTime: $state.motionStopTime"
         if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
             log.debug "State is On and brightness is higher than trigger value"
             deactivateSwitch()
@@ -318,6 +318,10 @@ def illuminanceHandler(evt) {
                     	deactivateSwitch()
                     }
                 }
+            }
+            else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)) {
+            	log.debug "State is off and brightness is lower than trigger value. Timer was already running."
+                activateSwitch()
             }
         }
         else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
