@@ -171,6 +171,7 @@ def positionHandler(evt) {
 			}
 		}
 		restoreStates(sceneId)
+		restoreStates(sceneId)
 	}
 	else {
 		log.trace "No status change"
@@ -216,14 +217,14 @@ private saveStates(params) {
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
-	def setScene = settings."sceneMode_${sceneId}"
-	if (setScene) {
-		log.debug "Home-mode set to '${setScene}'."
-		if (location.mode != setScene) {
-			sendNotificationEvent("Home-mode set to '${setScene}'.")
-		}
-		changeMode(setScene)
-	}
+	//def setScene = settings."sceneMode_${sceneId}"
+	//if (setScene) {
+	//	log.debug "Home-mode set to '${setScene}'."
+	//	if (location.mode != setScene) {
+	//		sendNotificationEvent("Home-mode set to '${setScene}'.")
+	//	}
+	//	changeMode(setScene)
+	//}
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false

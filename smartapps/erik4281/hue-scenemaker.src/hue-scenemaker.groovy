@@ -121,6 +121,7 @@ def subscribeToEvents() {
 def appTouchHandler(evt) {
 	log.info "app started manually"
     activateHue()
+    activateHue()
 }
 
 def switchHandler(evt) {
@@ -128,6 +129,7 @@ def switchHandler(evt) {
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
+        activateHue()
         activateHue()
 	}
 	else if (switchValue) {
@@ -145,6 +147,7 @@ def scheduledTimeHandler() {
 	if (switchValue && allOk) {
     	log.trace "do it!"
         activateHue()
+        activateHue()
 	}
     else if (switchValue) {
     	log.info "Wrong mode to activate anything"
@@ -160,6 +163,7 @@ def modeChangeHandler(evt) {
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
     	log.trace "do it!"
+        activateHue()
         activateHue()
 	}
     else if (switchValue) {

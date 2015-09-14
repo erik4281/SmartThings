@@ -78,6 +78,7 @@ def subscribeToEvents() {
 def appTouchHandler(evt) {
 	log.info "app started manually"
     deactivateHue()
+    deactivateHue()
 }
 
 def switchHandler(evt) {
@@ -88,6 +89,7 @@ def switchHandler(evt) {
     	log.info "Wrong mode to activate anything"
     }
 	else {
+        deactivateHue()
         deactivateHue()
     }
 }
