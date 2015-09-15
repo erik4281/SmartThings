@@ -156,7 +156,7 @@ def switchHandler(evt) {
 	log.trace "switchHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && allOkExtra) {
+	if (switchValue && darkOk && allOk) {
     	log.debug "motionValue = true"
 		activateSwitch()
         state.motionStopTime = null
@@ -183,13 +183,13 @@ def motionHandler(evt) {
 	log.trace "motionHandler"
 	def current = motionSensor.currentValue("motion")
 	def motionValue = motionSensor.find{it.currentMotion == "active"}
-	if (allOk) {
+	if (switchOk && allOk) {
     	log.debug "allOk"
         if (motionValue) {
             log.debug "motionValue = true"
             state.motionStopTime = null
-            if (allOkExtra) {
-	            log.debug "allOkExtra"
+            if (darkOk && allOk) {
+	            log.debug "allOk"
                 activateSwitch()
             }
         }
@@ -239,12 +239,12 @@ def contactHandler(evt) {
 	log.trace "contactHandler"
 	def current = contactSensor.currentValue("contact")
 	def contactValue = contactSensor.find{it.currentContact == "open"}
-	if (allOk) {
+	if (switchOk && allOk) {
         log.debug "allOk"
         if (contactValue) {
             state.motionStopTime = null
-            if (allOkExtra) {
-	            log.debug "allOkExtra"
+            if (darkOk && allOk) {
+	            log.debug "allOk"
                 activateSwitch()
             }
         }
@@ -292,7 +292,7 @@ def contactHandler(evt) {
 
 def illuminanceHandler(evt) {
 	log.trace "illuminanceHandler()"
-    if (modeOk && daysOk && timeOk) {
+    if (allOk) {
     	log.debug "allOk"
         log.info "state.lastStatus: $state.lastStatus"
         log.info "evt.integerValue: $evt.integerValue"
@@ -321,7 +321,11 @@ def illuminanceHandler(evt) {
             }
             else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)) {
             	log.debug "State is off and brightness is lower than trigger value. Timer was already running."
-                activateSwitch()
+                if (switchOk) {
+                }
+                else {
+                    activateSwitch()
+                }
             }
         }
         else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
@@ -434,7 +438,7 @@ private getAllOkExtra() {
 }
 
 private getAllOk() {
-	modeOk && daysOk && timeOk && switchOk
+	modeOk && daysOk && timeOk
 }
 
 private getSwitchOk() {
