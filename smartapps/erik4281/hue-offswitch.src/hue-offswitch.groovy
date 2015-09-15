@@ -38,7 +38,7 @@ preferences {
 
 def lightSelectPage() {
 	dynamicPage(name: "lightSelectPage") {
-        section("Use this (virtual) switch"){
+        section("Use this (virtual) switch") {
             input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
         }
 		section("To switch off these lights (when the switch is OFF)") {
