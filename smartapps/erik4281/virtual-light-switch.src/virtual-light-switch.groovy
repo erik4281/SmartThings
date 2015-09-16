@@ -303,7 +303,7 @@ def illuminanceHandler(evt) {
         }
         else if (state.motionStopTime) {
             log.debug "Timer is running (so no motion at the moment)"
-            if (state.lastStatus != "off") {
+            if (state.lastStatus != "off" && switchOk) {
                 log.debug "State is on"
                 def elapsed = now() - state.motionStopTime                
 			    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
@@ -319,13 +319,9 @@ def illuminanceHandler(evt) {
                     }
                 }
             }
-            else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)) {
+            else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOk != true) {
             	log.debug "State is off and brightness is lower than trigger value. Timer was already running."
-                if (switchOk) {
-                }
-                else {
-                    activateSwitch()
-                }
+                activateSwitch()
             }
         }
         else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
