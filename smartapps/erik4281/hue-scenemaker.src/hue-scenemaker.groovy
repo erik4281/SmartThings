@@ -142,6 +142,7 @@ def switchHandler(evt) {
 
 def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
+	pause(2000)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
@@ -159,7 +160,8 @@ def scheduledTimeHandler() {
 
 def modeChangeHandler(evt) {
 	log.trace "modeChangeHandler()"
-	def current = inputSwitch.currentValue('switch')
+	pause(2000)
+    def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && allOk) {
     	log.trace "do it!"
