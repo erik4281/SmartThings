@@ -160,17 +160,22 @@ def appTouchHandler(evt) {
 }
 
 def eventHandler(evt) {
+	log.trace "eventHandler: $evt.name: $evt.value"
     state.eventStopTime = null
 	if (modeOk && daysOk && timeOk) {
-		if (darkOk && switchOk && moodOk) {
+		if (darkOk && moodOk) {
         	activateHue()
 		}
 	}
 }
 
 def eventOffHandler(evt) {
+	log.trace "eventHandler: $evt.name: $evt.value"
 	state.eventStopTime = now()
-	if (switchOk && modeOk && daysOk && timeOk) {
+    if (evt.name == "switch" && evt.value == "off") {
+        runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+	}
+	else if (switchOk && modeOk && daysOk && timeOk) {
 		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
         	runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
         }
@@ -182,7 +187,7 @@ def eventOffHandler(evt) {
         }
 	}
     else if (switchOk) {
-    	runIn(60*60, turnOffAfterDelay, [overwrite: false])
+    	runIn(30*60, turnOffAfterDelay, [overwrite: false])
     }
 }
 
@@ -348,6 +353,7 @@ private deactivateHue() {
 	state.lastStatus = "off"
     lights.each {light ->
         light.off()
+        light.off()
     }
 }
 
@@ -412,24 +418,25 @@ private getSwitchOk() {
     else {
     	result = true
     }
+    log.trace "switchOk = $result"
     result
 }
 
 private getMoodOk() {
+	def result = true
 	if (moodSwitch) {
     	if (moodSwitch.currentSwitch == "off") {
-			def result = true
-    		result
+			result = true
     	}
         else {
-        	def result = false
-            result
+        	result = false
     	}
     }
     else {
-    	def result = true
-    	result
+    	result = true
 	}
+    log.trace "moodOk = $result"
+    result
 }
 
 private getDarkOk() {
@@ -440,6 +447,7 @@ private getDarkOk() {
 	else {
 		result = true
 	}
+    log.trace "darkOk = $result"
 	result
 }
 
@@ -463,6 +471,7 @@ private getShortTimeOk() {
 
 private getModeOk() {
 	def result = !modes || modes.contains(location.mode)
+    log.trace "modeOk = $result"
 	result
 }
 
@@ -479,6 +488,7 @@ private getDaysOk() {
 		def day = df.format(new Date())
 		result = days.contains(day)
 	}
+    log.trace "daysOk = $result"
 	result
 }
 
@@ -490,6 +500,7 @@ private getTimeOk() {
 		def stop = timeToday(ending, location?.timeZone).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
+    log.trace "timeOk = $result"
 	result
 }
 
