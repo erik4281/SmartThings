@@ -41,6 +41,9 @@ preferences {
 
 def switchPage() {
 	dynamicPage(name: "switchPage") {
+        section("Control these switches") {
+			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
+        }
         section("Switch on when..."){
             input "motionSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
             input "contactSensor", "capability.contactSensor", title: "Contact opens", required: false, multiple: true
@@ -64,23 +67,20 @@ def switchPage() {
 			input "lightOnValue", "number", title: "On at < (Lux, empty = 100)?", required: false
 			input "lightOffValue", "number", title: "Off at > (Lux, empty = 150)?", required: false
 		}
+		section("Use MoodCube switch (disable auto-switching light)") {
+			input "moodSwitch", "capability.switch", title: "Switch", required: false
+		}
 	}
 }
 
 def lightsPage() {
 	dynamicPage(name: "lightsPage") {
-        section("Control these switches") {
-			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
-        }
 		section("Timing options") {
 			input "starting", "time", title: "Starting from", required: false
 			input "ending", "time", title: "Ending at", required: false
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
-		}
-		section("Use MoodCube switch (disable auto-switching light)") {
-			input "moodSwitch", "capability.switch", title: "Switch", required: false
 		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
