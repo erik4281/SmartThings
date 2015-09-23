@@ -172,6 +172,7 @@ def positionHandler(evt) {
 		}
 		restoreStates(sceneId)
 		restoreStates(sceneId)
+		restoreStates(sceneId)
 	}
 	else {
 		log.trace "No status change"

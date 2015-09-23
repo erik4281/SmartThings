@@ -79,6 +79,7 @@ def appTouchHandler(evt) {
 	log.info "app started manually"
     deactivateHue()
     deactivateHue()
+    deactivateHue()
 }
 
 def switchHandler(evt) {
@@ -91,6 +92,7 @@ def switchHandler(evt) {
 	else {
         deactivateHue()
         deactivateHue()
+    	deactivateHue()
     }
 }
 
