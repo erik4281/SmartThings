@@ -183,63 +183,67 @@ def initialize() {
  ******************/
 
 def appTouchHandler(evt) {
-	//def sceneId = getTiming()
-	//if (sceneId != state.lastActiveSceneId) {
-		activateHue()
-	//}
-	//state.lastActiveSceneId = sceneId
+    activateHue()
 }
 
 def eventHandler(evt) {
-	state.eventStopTime = null
+	log.trace "eventHandler: $evt.name: $evt.value"
+    state.eventStopTime = null
 	if (modeOk && daysOk && timeOk) {
-		if (darkOk && switchOk && moodOk) {
-			activateHue()
+		if (darkOk && moodOk) {
+        	activateHue()
 		}
 	}
 }
 
 def eventOffHandler(evt) {
+	log.trace "eventHandler: $evt.name: $evt.value"
 	state.eventStopTime = now()
-	if (switchOk && modeOk && daysOk && timeOk) {
+    if (evt.name == "switch" && evt.value == "off") {
+        runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+	}
+	else if (switchOk && modeOk && daysOk && timeOk) {
 		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
-			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
-		}
+        	runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+        }
+        else if (delayMinutes) {
+        	runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+        }
+		else  {
+        	turnOffAfterDelay()
+        }
 	}
-	else if (delayMinutes) {
-		runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
-	}
-	else if (switchOk) {
-		turnOffAfterDelay()
-	}
+    else if (switchOk) {
+    	runIn(30*60, turnOffAfterDelay, [overwrite: false])
+    }
 }
 
 def illuminanceHandler(evt) {
-	if (modeOk && daysOk && timeOk) {
-		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
-			deactivateHue()
-		}
-		else if (state.eventStopTime) {
-			if (state.lastStatus != "off" && switchOk) {
-				def elapsed = now() - state.eventStopTime                
-				if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
-					if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
-						deactivateHue()
-					}
-				}
+    if (modeOk && daysOk && timeOk) {
+        if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
+            deactivateHue()
+        }
+        else if (state.eventStopTime) {
+            if (state.lastStatus != "off" && switchOk) {
+                def elapsed = now() - state.eventStopTime                
+			    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+                   if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+			        	deactivateHue()
+                    }
+			    }
 				else if(delayMinutes) {
-					if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
-						deactivateHue()
-					}
-				}
-			}
-			else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOk != true) {
-				activateHue()
-			}
-		}
-		else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
-			activateHue()
-		}
+                    if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+                    	deactivateHue()
+                    }
+                }
+            }
+            else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOk != true) {
+                activateHue()
+            }
+        }
+        else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
+            activateHue()
+        }
 	}
 }
 
@@ -250,18 +254,18 @@ def modeChangeHandler(evt) {
 	}
 	if (evt.value in triggerModesOff) {
 		pause(2000)
-		deactivateHue()
+        deactivateHue()
 	}
 }
 
 def scheduledTimeHandler() {
 	pause(2000)
-	activateHue()
+    activateHue()
 }
 
 def scheduledTimeOffHandler() {
 	pause(2000)
-	deactivateHue()
+    deactivateHue()
 }
 
 /********************
@@ -382,6 +386,10 @@ private deactivateHue() {
 	state.lastStatus = "off"
 	lights.each {light ->
 		light.off()
+		pause(25)
+        light.off()
+		pause(25)
+        light.off()
 	}
 }
 
