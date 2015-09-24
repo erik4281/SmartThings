@@ -72,6 +72,7 @@ def switchPage() {
 			input "moodSwitch", "capability.switch", title: "Switch", required: false
 		}
 		section([mobileOnly:true]) {
+			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 			label title: "Assign a name", required: false
 		}
 	}
@@ -90,8 +91,7 @@ def scenesPage() {
 
 def optionsPage(params=[:]) {
 	log.debug "optionsPage($params)"
-	def sceneId = getTiming()
-	//def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
+	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
 	state.lastDisplayedSceneId = sceneId
 	dynamicPage(name:"optionsPage", title: "${sceneId}. ${sceneName(sceneId)}") {
 		section {
@@ -99,6 +99,13 @@ def optionsPage(params=[:]) {
 		}
 		section {
 			href "devicePage", title: "Show Device States", params: [sceneId:sceneId], description: "", state: sceneIsDefined(sceneId) ? "complete" : "incomplete"
+		}
+		section("Timing options") {
+			input "starting_${sceneId}", "time", title: "Starting from", required: false
+			input "ending_${sceneId}", "time", title: "Ending at", required: false
+			input "days_${sceneId}", "enum", title: "Only on certain days of the week", multiple: true, required: false,
+				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			input "modes_${sceneId}", "mode", title: "Only when mode is", multiple: true, required: false
 		}
 	}
 }
@@ -129,13 +136,6 @@ def devicePage(params) {
 				["Warm White":"Warm White - Relax"],
 				"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
 			}
-		}
-		section("Timing options") {
-			input "starting_${sceneId}", "time", title: "Starting from", required: false
-			input "ending_${sceneId}", "time", title: "Ending at", required: false
-			input "days_${sceneId}", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-			input "modes_${sceneId}", "mode", title: "Only when mode is", multiple: true, required: false
 		}
 	}
 }
@@ -183,11 +183,11 @@ def initialize() {
  ******************/
 
 def appTouchHandler(evt) {
-	def sceneId = getTiming()
-	if (sceneId != state.lastActiveSceneId) {
+	//def sceneId = getTiming()
+	//if (sceneId != state.lastActiveSceneId) {
 		activateHue()
-	}
-	state.lastActiveSceneId = sceneId
+	//}
+	//state.lastActiveSceneId = sceneId
 }
 
 def eventHandler(evt) {
@@ -288,12 +288,24 @@ def turnOffAfterDelayShort() {
 
 private activateHue() {
 	state.lastStatus = "on"
-	getDeviceCapabilities()
+    getDeviceCapabilities()
+    getTiming()
+    //log.info "state: ${state.lastDisplayedSceneId}"
+    def sceneId = state.lastDisplayedSceneId
+    log.info "FINALLY SELECTED SCENE = $sceneId"
+	//log.info "state: ${state.lastDisplayedSceneId}"
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
+        log.info "Light on: ${settings."onoff_${sceneId}_${light.id}"}"
+		if (isOn) {
+			light.on()
+		}
+		else {
+			light.off()
+		}
 		if (type != "switch" && moodOk) {
-			def level = switchLevel(light)
+            def level = switchLevel(sceneId, light)
 			if (type == "level") {
 				if (level != null) {
 					light.setLevel(level)
@@ -302,7 +314,7 @@ private activateHue() {
 			else if (type == "color") {
 				def hue = 23
 				def saturation = 56
-				switch(settings."color_${sceneId}_${light.id}") {
+                switch(settings."color_${sceneId}_${light.id}") {
 					case "White":
 					hue = 52
 					saturation = 19
@@ -363,12 +375,6 @@ private activateHue() {
 		}	
 		else {
 		}		
-		if (isOn) {
-			light.on()
-		}
-		else {
-			light.off()
-		}
 	}
 }
 
@@ -385,90 +391,87 @@ private deactivateHue() {
 
 private getTiming() {
 	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
-	log.info "sceneId = $sceneId"
+    state.selectedSceneId = 1
+    sceneId = state.selectedSceneId   
+	state.lastDisplayedSceneId = sceneId
+    
+    //log.info "initial sceneId = ${sceneId}"
+	//log.info "initial state: ${state.lastDisplayedSceneId}"
 	
-	
-	
-	//if 
+	state.modeChecker = modes_1
+    state.dayChecker = days_1
+    state.startingChecker = starting_1
+    state.endingChecker = ending_1
+    log.debug "checking scene 1"
+    if (timeOkScene && modeOkScene && daysOkScene && sceneName1) {
+        state.selectedSceneId = 1
+        log.info sceneName1
+    }
+	state.modeChecker = modes_2
+    state.dayChecker = days_2
+    state.startingChecker = starting_2
+    state.endingChecker = ending_2
+    log.debug "checking scene 2"
 
+    if (timeOkScene && modeOkScene && daysOkScene && sceneName2) {
+        state.selectedSceneId = 2
+        log.info sceneName2
+	}
+	state.modeChecker = modes_3
+    state.dayChecker = days_3
+    state.startingChecker = starting_3
+    state.endingChecker = ending_3
+    log.debug "checking scene 3"
 
-	//def result = !modes || modes.contains(location.mode)
-	//result
+    if (timeOkScene && modeOkScene && daysOkScene && sceneName3) {
+        state.selectedSceneId = 3
+        log.info sceneName3
+    }
+	state.modeChecker = modes_4
+    state.dayChecker = days_4
+    state.startingChecker = starting_4
+    state.endingChecker = ending_4
+    log.debug "checking scene 4"
 
-	//def result = true
-	//if (days) {
-	//	def df = new java.text.SimpleDateFormat("EEEE")
-	//	if (location.timeZone) {
-	//		df.setTimeZone(location.timeZone)
-	//	}
-	//	else {
-	//		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-	//	}
-	//	def day = df.format(new Date())
-	//	result = days.contains(day)
-	//}
-	//result
+    if (timeOkScene && modeOkScene && daysOkScene && sceneName4) {
+        state.selectedSceneId = 4
+        log.info sceneName4
+    }
+	state.modeChecker = modes_5
+    state.dayChecker = days_5
+    state.startingChecker = starting_5
+    state.endingChecker = ending_5
+    log.debug "checking scene 5"
 
-	//def result = true
-	//if (starting && ending) {
-	//	def currTime = now()
-	//	def start = timeToday(starting, location?.timeZone).time
-	//	def stop = timeToday(ending, location?.timeZone).time
-	//	result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
-	//}
-	//result
+    if (timeOkScene && modeOkScene && daysOkScene && sceneName5) {
+        state.selectedSceneId = 5
+        log.info sceneName5
+    }
+	state.modeChecker = modes_6
+    state.dayChecker = days_6
+    state.startingChecker = starting_6
+    state.endingChecker = ending_6
+    log.debug "checking scene 6"
 
+    if (timeOkScene && modeOkScene && daysOkScene && sceneName6) {
+        state.selectedSceneId = 6
+        log.info sceneName6
+    }
 
+	sceneId = state.selectedSceneId
+    state.lastDisplayedSceneId = sceneId
 
+    //log.info "sceneId = $sceneId"
+	//log.info "selected state: ${state.lastDisplayedSceneId}"
+	//log.info "selected state: ${state.selectedSceneId}"
 
-
-
-
-
-	//final threshold = 250
-	//def value = xyz ?: cube.currentValue("threeAxis")
-	//def x = Math.abs(value.x) > threshold ? (value.x > 0 ? 1 : -1) : 0
-	//def y = Math.abs(value.y) > threshold ? (value.y > 0 ? 1 : -1) : 0
-	//def z = Math.abs(value.z) > threshold ? (value.z > 0 ? 1 : -1) : 0
-	//def orientation = 6
-	//if (z > 0) {
-	//	if (x == 0 && y == 0) {
-	//		orientation = 1
-	//	}
-	//}
-	//else if (z < 0) {
-	//	if (x == 0 && y == 0) {
-	//		orientation = 2
-	//	}
-	//}
-	//else {
-	//	if (x > 0) {
-	//		if (y == 0) {
-	//			orientation = 3
-	//		}
-	//	}
-	//	else if (x < 0) {
-	//		if (y == 0) {
-	//			orientation = 4
-	//		}
-	//	}
-	//	else {
-	//		if (y > 0) {
-	//			orientation = 5
-	//		}
-	//		else if (y < 0) {
-	//			orientation = 6
-	//		}
-	//	}
-	//}
-	//orientation
 }
 
 private closestLevel(level) {
 	level ? "${Math.round(level/5) * 5}%" : "0%"
 }
 
-private switchLevel(light) {
+private switchLevel(sceneId, light) {
 	def percent = settings."level_${sceneId}_${light.id}"
 	if (percent) {
 		percent[0..-2].toInteger()
@@ -618,14 +621,16 @@ private getTimeOk() {
 }
 
 private getModeOkScene() {
-	def result = !modes_${sceneId} || modes_${sceneId}.contains(location.mode)
-	log.trace "modeOkScene_${sceneId} = $result"
+	def modes = state.modeChecker
+	def result = !modes || modes.contains(location.mode)
+	log.trace "modeOkScene = $result"
 	result
 }
 
 private getDaysOkScene() {
+	def days = state.dayChecker
 	def result = true
-	if (days_${sceneId}) {
+	if (days) {
 		def df = new java.text.SimpleDateFormat("EEEE")
 		if (location.timeZone) {
 			df.setTimeZone(location.timeZone)
@@ -634,23 +639,26 @@ private getDaysOkScene() {
 			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
 		}
 		def day = df.format(new Date())
-		result = days_${sceneId}.contains(day)
+		result = days.contains(day)
 	}
-	log.trace "daysOkScene_${sceneId} = $result"
+	log.trace "daysOkScene = $result"
 	result
 }
 
 private getTimeOkScene() {
+	def starting = state.startingChecker
+	def ending = state.endingChecker
 	def result = true
-	if (starting_${sceneId} && ending_${sceneId}) {
+	if (starting && ending) {
 		def currTime = now()
-		def start = timeToday(starting_${sceneId}, location?.timeZone).time
-		def stop = timeToday(ending_${sceneId}, location?.timeZone).time
+		def start = timeToday(starting, location?.timeZone).time
+		def stop = timeToday(ending, location?.timeZone).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
-	log.trace "timeOk_${sceneId} = $result"
+	log.trace "timeOkScene = $result"
 	result
 }
+
 //private hhmm(time, fmt = "h:mm a")
 //{
 //	def t = timeToday(time, location.timeZone)
