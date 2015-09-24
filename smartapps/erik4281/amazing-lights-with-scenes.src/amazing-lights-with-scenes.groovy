@@ -90,8 +90,8 @@ def scenesPage() {
 
 def optionsPage(params=[:]) {
 	log.debug "optionsPage($params)"
-	def sceneId = getTiming()
-	//def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
+	//def sceneId = getTiming()
+	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
 	state.lastDisplayedSceneId = sceneId
 	dynamicPage(name:"optionsPage", title: "${sceneId}. ${sceneName(sceneId)}") {
 		section {
@@ -269,19 +269,19 @@ def scheduledTimeOffHandler() {
  ********************/
 
 def turnOffAfterDelay() {
-    if (state.eventStopTime && state.lastStatus != "off") {
+	if (state.eventStopTime && state.lastStatus != "off") {
 		def elapsed = now() - state.eventStopTime
-        if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
-        	deactivateHue()
+		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+			deactivateHue()
 		}
 	}
 }
 
 def turnOffAfterDelayShort() {
-    if (state.eventStopTime && state.lastStatus != "off") {
+	if (state.eventStopTime && state.lastStatus != "off") {
 		def elapsed = now() - state.eventStopTime
-        if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
-        	deactivateHue()
+		if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+			deactivateHue()
 		}
 	}
 }
@@ -304,49 +304,49 @@ private activateHue() {
 				def saturation = 56
 				switch(settings."color_${sceneId}_${light.id}") {
 					case "White":
-						hue = 52
-						saturation = 19
-						break;
+					hue = 52
+					saturation = 19
+					break;
 					case "Daylight":
-						hue = 53
-						saturation = 91
-						break;
+					hue = 53
+					saturation = 91
+					break;
 					case "Soft White":
-						hue = 23
-						saturation = 56
-						break;
+					hue = 23
+					saturation = 56
+					break;
 					case "Warm White":
-						hue = 20
-						saturation = 80
-						break;
+					hue = 20
+					saturation = 80
+					break;
 					case "Blue":
-						hue = 70
-			            saturation = 100
-						break;
+					hue = 70
+					saturation = 100
+					break;
 					case "Green":
-						hue = 39
-			            saturation = 100
-						break;
+					hue = 39
+					saturation = 100
+					break;
 					case "Yellow":
-						hue = 25
-			            saturation = 100
-						break;
+					hue = 25
+					saturation = 100
+					break;
 					case "Orange":
-						hue = 10
-			            saturation = 100
-						break;
+					hue = 10
+					saturation = 100
+					break;
 					case "Purple":
-						hue = 75
-			            saturation = 100
-						break;
+					hue = 75
+					saturation = 100
+					break;
 					case "Pink":
-						hue = 83
-			            saturation = 100
-						break;
+					hue = 83
+					saturation = 100
+					break;
 					case "Red":
-						hue = 100
-			            saturation = 100
-						break;
+					hue = 100
+					saturation = 100
+					break;
 				}
 				if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
@@ -374,9 +374,9 @@ private activateHue() {
 
 private deactivateHue() {
 	state.lastStatus = "off"
-    lights.each {light ->
-        light.off()
-    }
+	lights.each {light ->
+		light.off()
+	}
 }
 
 /******************
@@ -478,13 +478,13 @@ private getDeviceCapabilities() {
 	def caps = [:]
 	lights.each {
 		if (it.hasCapability("Color Control")) {
-            caps[it.id] = "color"
+			caps[it.id] = "color"
 		}
 		else if (it.hasCapability("Switch Level")) {
-            caps[it.id] = "level"
+			caps[it.id] = "level"
 		}
 		else {
-            caps[it.id] = "switch"
+			caps[it.id] = "switch"
 		}
 	}
 	state.lightCapabilities = caps
@@ -515,36 +515,37 @@ private sceneName(num) {
 private getSwitchOk() {
 	def result = true
 	if (inputSwitch) {
-    	def current = inputSwitch.currentValue('switch')
+		def current = inputSwitch.currentValue('switch')
 		def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 		if (switchValue) {
-    		result = false
-        }
-        else {
-        	result = true
-        }
-    }
-    else {
-    	result = true
-    }
-    result
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOk = $result"
+	result
 }
 
 private getMoodOk() {
+	def result = true
 	if (moodSwitch) {
-    	if (moodSwitch.currentSwitch == "off") {
-			def result = true
-    		result
-    	}
-        else {
-        	def result = false
-            result
-    	}
-    }
-    else {
-    	def result = true
-    	result
+		if (moodSwitch.currentSwitch == "off") {
+			result = true
+		}
+		else {
+			result = false
+		}
 	}
+	else {
+		result = true
+	}
+	log.trace "moodOk = $result"
+	result
 }
 
 private getDarkOk() {
@@ -555,6 +556,7 @@ private getDarkOk() {
 	else {
 		result = true
 	}
+	log.trace "darkOk = $result"
 	result
 }
 
@@ -578,6 +580,7 @@ private getShortTimeOk() {
 
 private getModeOk() {
 	def result = !modes || modes.contains(location.mode)
+	log.trace "modeOk = $result"
 	result
 }
 
@@ -594,6 +597,7 @@ private getDaysOk() {
 		def day = df.format(new Date())
 		result = days.contains(day)
 	}
+	log.trace "daysOk = $result"
 	result
 }
 
@@ -605,6 +609,7 @@ private getTimeOk() {
 		def stop = timeToday(ending, location?.timeZone).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
+	log.trace "timeOk = $result"
 	result
 }
 
