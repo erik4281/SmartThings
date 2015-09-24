@@ -34,29 +34,29 @@ definition(
  **********/
 
 preferences {
-    page(name: "switchPage", title: "Switch on lights when this happens:", nextPage: "scenesPage", uninstall: true) 
-    page(name: "scenesPage", title: "Switch these lights when this is true:", install: true, uninstall: true) 
-    page(name: "optionsPage", title: "Use these options:", install: false, uninstall: false, previousPage: "scenesPage") 
+	page(name: "switchPage", title: "Switch on lights when this happens:", nextPage: "scenesPage", uninstall: true) 
+	page(name: "scenesPage", title: "Switch these lights when this is true:", install: true, uninstall: true) 
+	page(name: "optionsPage", title: "Use these options:", install: false, uninstall: false, previousPage: "scenesPage") 
 	page(name: "devicePage", install: false, uninstall: false, previousPage: "optionsPage")
 }
 
 def switchPage() {
 	dynamicPage(name: "switchPage") {
-        section("Control these switches") {
+		section("Control these switches") {
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
-        }
-        section("Switch on when..."){
-            input "motionSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
-            input "contactSensor", "capability.contactSensor", title: "Contact opens", required: false, multiple: true
+		}
+		section("Switch on when..."){
+			input "motionSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
+			input "contactSensor", "capability.contactSensor", title: "Contact opens", required: false, multiple: true
 			input "inputSwitch", "capability.switch", title: "Switch turns on", required: false, multiple: true
-            input "triggerModes", "mode", title: "System changes mode", required: false, multiple: true
-            input "timeOfDay", "time", title: "At a scheduled time", required: false
-        }
-        section("Switch off when..."){
-            input "delayMinutes", "number", title: "Off after x minutes of motion/contact", required: false
-            input "triggerModesOff", "mode", title: "System changes mode", required: false, multiple: true
-            input "timeOfDayOff", "time", title: "At a scheduled time", required: false
-        }
+			input "triggerModes", "mode", title: "System changes mode", required: false, multiple: true
+			input "timeOfDay", "time", title: "At a scheduled time", required: false
+		}
+		section("Switch off when..."){
+			input "delayMinutes", "number", title: "Off after x minutes of motion/contact", required: false
+			input "triggerModesOff", "mode", title: "System changes mode", required: false, multiple: true
+			input "timeOfDayOff", "time", title: "At a scheduled time", required: false
+		}
 		section("Or switch off faster") {
 			input "shortDelayMinutes", "number", title: "Off after x minutes", required: false
 			input "shortModes", "mode", title: "In mode(s)", required: false, multiple: true
