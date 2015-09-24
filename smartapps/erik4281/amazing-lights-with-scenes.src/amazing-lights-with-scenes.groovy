@@ -90,8 +90,8 @@ def scenesPage() {
 
 def optionsPage(params=[:]) {
 	log.debug "optionsPage($params)"
-	//def sceneId = getTiming()
-	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
+	def sceneId = getTiming()
+	//def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
 	state.lastDisplayedSceneId = sceneId
 	dynamicPage(name:"optionsPage", title: "${sceneId}. ${sceneName(sceneId)}") {
 		section {
@@ -384,7 +384,11 @@ private deactivateHue() {
  ******************/
 
 private getTiming() {
-
+	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
+	log.info "sceneId = $sceneId"
+	
+	
+	
 	//if 
 
 
@@ -613,6 +617,40 @@ private getTimeOk() {
 	result
 }
 
+private getModeOkScene() {
+	def result = !modes_${sceneId} || modes_${sceneId}.contains(location.mode)
+	log.trace "modeOkScene_${sceneId} = $result"
+	result
+}
+
+private getDaysOkScene() {
+	def result = true
+	if (days_${sceneId}) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_${sceneId}.contains(day)
+	}
+	log.trace "daysOkScene_${sceneId} = $result"
+	result
+}
+
+private getTimeOkScene() {
+	def result = true
+	if (starting_${sceneId} && ending_${sceneId}) {
+		def currTime = now()
+		def start = timeToday(starting_${sceneId}, location?.timeZone).time
+		def stop = timeToday(ending_${sceneId}, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOk_${sceneId} = $result"
+	result
+}
 //private hhmm(time, fmt = "h:mm a")
 //{
 //	def t = timeToday(time, location.timeZone)
