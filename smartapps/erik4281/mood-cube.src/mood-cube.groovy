@@ -156,7 +156,6 @@ def initialize() {
  ******************/
  
 def positionHandler(evt) {
-
 	def sceneId = getOrientation(evt.xyzValue)
 	log.trace "orientation: $sceneId"
 	if (sceneId != state.lastActiveSceneId) {
@@ -218,14 +217,6 @@ private saveStates(params) {
 private restoreStates(sceneId) {
 	log.trace "restoreStates($sceneId)"
 	getDeviceCapabilities()
-	//def setScene = settings."sceneMode_${sceneId}"
-	//if (setScene) {
-	//	log.debug "Home-mode set to '${setScene}'."
-	//	if (location.mode != setScene) {
-	//		sendNotificationEvent("Home-mode set to '${setScene}'.")
-	//	}
-	//	changeMode(setScene)
-	//}
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
@@ -247,55 +238,55 @@ private restoreStates(sceneId) {
 			else if (type == "color") {
 				def hue = 23
 				def saturation = 56				
-                log.info settings."color_${sceneId}_${light.id}"
+				log.info settings."color_${sceneId}_${light.id}"
 				switch(settings."color_${sceneId}_${light.id}") {
 					case "White":
-						hue = 52
-						saturation = 19
-						break;
+					hue = 52
+					saturation = 19
+					break;
 					case "Daylight":
-						hue = 53
-						saturation = 91
-						break;
+					hue = 53
+					saturation = 91
+					break;
 					case "Soft White":
-						hue = 23
-						saturation = 56
-						break;
+					hue = 23
+					saturation = 56
+					break;
 					case "Warm White":
-						hue = 20
-						saturation = 80 //83
-						break;
+					hue = 20
+					saturation = 80 //83
+					break;
 					case "Blue":
-						hue = 70
-			            saturation = 100
-						break;
+					hue = 70
+					saturation = 100
+					break;
 					case "Green":
-						hue = 39
-			            saturation = 100
-						break;
+					hue = 39
+					saturation = 100
+					break;
 					case "Yellow":
-						hue = 25
-			            saturation = 100
-						break;
+					hue = 25
+					saturation = 100
+					break;
 					case "Orange":
-						hue = 10
-			            saturation = 100
-						break;
+					hue = 10
+					saturation = 100
+					break;
 					case "Purple":
-						hue = 75
-			            saturation = 100
-						break;
+					hue = 75
+					saturation = 100
+					break;
 					case "Pink":
-						hue = 83
-			            saturation = 100
-						break;
+					hue = 83
+					saturation = 100
+					break;
 					case "Red":
-						hue = 100
-			            saturation = 100
-						break;
+					hue = 100
+					saturation = 100
+					break;
 				}
 				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
-                if (level != null) {
+				if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
 				}
 				else {
