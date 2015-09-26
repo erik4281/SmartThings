@@ -19,14 +19,14 @@
  ************/
 
 definition(
-    name: "Virtual On/Off Switch Creator",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Creates virtual switches!",
-    category: "My Apps",
-    iconUrl: "http://baldeagle072.github.io/icons/standard-tile@1x.png",
-    iconX2Url: "http://baldeagle072.github.io/icons/standard-tile@2x.png",
-    iconX3Url: "http://baldeagle072.github.io/icons/standard-tile@3x.png")
+	name: "Virtual On/Off Switch Creator",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Creates virtual switches!",
+	category: "My Apps",
+	iconUrl: "http://baldeagle072.github.io/icons/standard-tile@1x.png",
+	iconX2Url: "http://baldeagle072.github.io/icons/standard-tile@2x.png",
+	iconX3Url: "http://baldeagle072.github.io/icons/standard-tile@3x.png")
 
 /************
  * Metadata *
@@ -54,12 +54,12 @@ def updated() {
 }
 
 def initialize() {
-    def deviceId = app.id + "SimulatedSwitch"
-    log.debug(deviceId)
-    def existing = getChildDevice(deviceId)
-    if (!existing) {
-        def childDevice = addChildDevice("smartthings", "On/Off Button Tile", deviceId, null, [label: switchLabel])
-    }
+	def deviceId = app.id + "SimulatedSwitch"
+	log.debug(deviceId)
+	def existing = getChildDevice(deviceId)
+	if (!existing) {
+		def childDevice = addChildDevice("smartthings", "On/Off Button Tile", deviceId, null, [label: switchLabel])
+	}
 }
 
 def uninstalled() {
@@ -75,7 +75,7 @@ def uninstalled() {
  ******************/
 
 private removeChildDevices(delete) {
-    delete.each {
-        deleteChildDevice(it.deviceNetworkId)
-    }
+	delete.each {
+		deleteChildDevice(it.deviceNetworkId)
+	}
 }
