@@ -16,19 +16,19 @@
  *  Date: 2014-01-20
  */
 definition(
-    name: "Notify via lights",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Changes the color and brightness of Philips Hue bulbs when any of a variety of SmartThings is activated.  Supports motion, contact, acceleration, moisture and presence sensors as well as switches.",
-    category: "SmartThings Labs",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/hue.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/hue@2x.png"
+	name: "Notify via lights",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Changes the color and brightness of Philips Hue bulbs when any of a variety of SmartThings is activated.  Supports motion, contact, acceleration, moisture and presence sensors as well as switches.",
+	category: "SmartThings Labs",
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/hue.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/hue@2x.png"
 )
 
 preferences {
 
 	section("Control these bulbs...") {
-		input "hues", "capability.colorControl", title: "Which Hue Bulbs?", required:true, multiple:true
+		input "lights", "capability.colorControl", multiple: true, required: true, title: "Lights, switches & dimmers"
 	}
 
 	section("Choose one or more, when..."){
@@ -40,24 +40,21 @@ preferences {
 		input "mySwitchOff", "capability.switch", title: "Switch Turned Off", required: false, multiple: true
 		input "arrivalPresence", "capability.presenceSensor", title: "Arrival Of", required: false, multiple: true
 		input "departurePresence", "capability.presenceSensor", title: "Departure Of", required: false, multiple: true
-		input "smoke", "capability.smokeDetector", title: "Smoke Detected", required: false, multiple: true
-		input "water", "capability.waterSensor", title: "Water Sensor Wet", required: false, multiple: true
-		input "button1", "capability.button", title: "Button Press", required:false, multiple:true //remove from production
-		input "triggerModes", "mode", title: "System Changes Mode", description: "Select mode(s)", required: false, multiple: true
-		input "timeOfDay", "time", title: "At a Scheduled Time", required: false
+
 	}
 
 	section("Choose light effects...")
 		{
-			input "color", "enum", title: "Hue Color?", required: false, multiple:false, options: ["Red","Green","Blue","Yellow","Orange","Purple","Pink"]
-			input "lightLevel", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
+			input "color", "enum", title: "Color?", required: false, multiple:false, options: [
+			["Soft White":"Soft White - Default"],
+			["White":"White - Concentrate"],
+			["Daylight":"Daylight - Energize"],
+			["Warm White":"Warm White - Relax"],
+			"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
+			input "level", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
 			input "duration", "number", title: "Duration Seconds?", required: false
-			//input "turnOn", "enum", title: "Turn On when Off?", required: false, options: ["Yes","No"]
 		}
 
-	section("Minimum time between messages (optional, defaults to every message)") {
-		input "frequency", "decimal", title: "Minutes", required: false
-	}
 }
 
 def installed() {
@@ -82,72 +79,93 @@ def subscribeToEvents() {
 	subscribe(mySwitchOff, "switch.off", eventHandler)
 	subscribe(arrivalPresence, "presence.present", eventHandler)
 	subscribe(departurePresence, "presence.not present", eventHandler)
-	subscribe(smoke, "smoke.detected", eventHandler)
-	subscribe(smoke, "smoke.tested", eventHandler)
-	subscribe(smoke, "carbonMonoxide.detected", eventHandler)
-	subscribe(water, "water.wet", eventHandler)
-	subscribe(button1, "button.pushed", eventHandler)
 
-	if (triggerModes) {
-		subscribe(location, modeChangeHandler)
-	}
 
-	if (timeOfDay) {
-		schedule(timeOfDay, scheduledTimeHandler)
-	}
+	subscribe(contact, "contact.closed", eventOffHandler)
+	subscribe(contactClosed, "contact.open", eventOffHandler)
+	subscribe(acceleration, "acceleration.inactive", eventOffHandler)
+	subscribe(motion, "motion.inactive", eventOffHandler)
+	subscribe(mySwitch, "switch.off", eventOffHandler)
+	subscribe(mySwitchOff, "switch.on", eventOffHandler)
+	subscribe(arrivalPresence, "presence.not present", eventOffHandler)
+	subscribe(departurePresence, "presence.present", eventOffHandler)
+
+
 }
 
 def eventHandler(evt) {
-	if (frequency) {
-		def lastTime = state[evt.deviceId]
-		if (lastTime == null || now() - lastTime >= frequency * 60000) {
-			takeAction(evt)
-		}
-	}
-	else {
-		takeAction(evt)
-	}
+		log.debug "eventHandler"
+        takeAction(evt)
 }
 
-def modeChangeHandler(evt) {
-	log.trace "modeChangeHandler $evt.name: $evt.value ($triggerModes)"
-	if (evt.value in triggerModes) {
-		eventHandler(evt)
-	}
-}
+def eventOffHandler(evt) {
+		log.debug "eventOffHandler"
 
-def scheduledTimeHandler() {
-	eventHandler(null)
+		resetHue()
 }
 
 def appTouchHandler(evt) {
+		log.debug "appTouchHandler"
+
 	takeAction(evt)
 }
 
 private takeAction(evt) {
 
-	if (frequency) {
-		state[evt.deviceId] = now()
-	}
+				def hue = 23
+				def saturation = 56
+				switch(settings."color") {
+					case "White":
+					hue = 52
+					saturation = 19
+					break;
+					case "Daylight":
+					hue = 53
+					saturation = 91
+					break;
+					case "Soft White":
+					hue = 23
+					saturation = 56
+					break;
+					case "Warm White":
+					hue = 20
+					saturation = 80
+					break;
+					case "Blue":
+					hue = 70
+					saturation = 100
+					break;
+					case "Green":
+					hue = 39
+					saturation = 100
+					break;
+					case "Yellow":
+					hue = 25
+					saturation = 100
+					break;
+					case "Orange":
+					hue = 10
+					saturation = 100
+					break;
+					case "Purple":
+					hue = 75
+					saturation = 100
+					break;
+					case "Pink":
+					hue = 83
+					saturation = 100
+					break;
+					case "Red":
+					hue = 100
+					saturation = 100
+					break;
+				}
 
-	def hueColor = 0
-	if(color == "Blue")
-		hueColor = 70//60
-	else if(color == "Green")
-		hueColor = 39//30
-	else if(color == "Yellow")
-		hueColor = 25//16
-	else if(color == "Orange")
-		hueColor = 10
-	else if(color == "Purple")
-		hueColor = 75
-	else if(color == "Pink")
-		hueColor = 83
 
 
 	state.previous = [:]
 
-	hues.each {
+	lights.each {
 		state.previous[it.id] = [
 			"switch": it.currentValue("switch"),
 			"level" : it.currentValue("level"),
@@ -158,11 +176,15 @@ private takeAction(evt) {
 	}
 
 	log.debug "current values = $state.previous"
+    
+    
+	//def newValue = [hue: hue, saturation: saturation, level: level]
+	def newValue = [hue: hue, saturation: 100, level: (level as Integer) ?: 100]
+    log.debug "new value = $newValue"
 
-	def newValue = [hue: hueColor, saturation: 100, level: (lightLevel as Integer) ?: 100]
-	log.debug "new value = $newValue"
-
-	hues*.setColor(newValue)
+	lights.setColor(newValue)
+    //lights.setColor(level: level, hue: hue, saturation: saturation)
+    log.debug "Lights set"
 	setTimer()
 }
 
@@ -192,7 +214,7 @@ def setTimer()
 
 def resetHue()
 {
-	hues.each {
+	lights.each {
 		it.setColor(state.previous[it.id])        
 	}
 }
