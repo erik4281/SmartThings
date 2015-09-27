@@ -22,7 +22,7 @@ definition(
 
 preferences {
 	section("Control these bulbs...") {
-		input "lights", "capability.colorControl", multiple: true, required: true, title: "Lights, switches & dimmers"
+		input "lights", "capability.switchLevel", multiple: true, required: true, title: "Lights, switches & dimmers"
 	}
 	section("Choose one or more, when...") {
 		input "motion", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
@@ -94,68 +94,94 @@ def appTouchHandler(evt) {
 }
 
 private takeAction(evt) {
-	def hue = 23
-	def saturation = 56
-	switch(settings."color") {
-		case "White":
-		hue = 52
-		saturation = 19
-		break;
-		case "Daylight":
-		hue = 53
-		saturation = 91
-		break;
-		case "Soft White":
-		hue = 23
-		saturation = 56
-		break;
-		case "Warm White":
-		hue = 20
-		saturation = 80
-		break;
-		case "Blue":
-		hue = 70
-		saturation = 100
-		break;
-		case "Green":
-		hue = 39
-		saturation = 100
-		break;
-		case "Yellow":
-		hue = 25
-		saturation = 100
-		break;
-		case "Orange":
-		hue = 10
-		saturation = 100
-		break;
-		case "Purple":
-		hue = 75
-		saturation = 100
-		break;
-		case "Pink":
-		hue = 83
-		saturation = 100
-		break;
-		case "Red":
-		hue = 100
-		saturation = 100
-		break;
-	}
 	state.previous = [:]
-	lights.each {
-		state.previous[it.id] = [
-		"switch": it.currentValue("switch"),
-		"level" : it.currentValue("level"),
-		"hue": it.currentValue("hue"),
-		"saturation": it.currentValue("saturation"),
-		"color": it.currentValue("color")]
+	lights.each {light ->
+		state.previous[light.id] = [
+		"switch": light.currentValue("switch"),
+		"level" : light.currentValue("level"),
+		"hue": light.currentValue("hue"),
+		"saturation": light.currentValue("saturation"),
+		"color": light.currentValue("color")]
 	}
-	def newValue = [hue: hue, saturation: 100, level: (level as Integer) ?: 100]
 	log.debug "current values = $state.previous"
-	log.debug "new value = $newValue"
-	lights.setColor(newValue)
-	log.debug "Lights set"
+    def hue = 23
+    def saturation = 56
+    switch(settings."color") {
+        case "White":
+        hue = 52
+        saturation = 19
+        break;
+        case "Daylight":
+        hue = 53
+        saturation = 91
+        break;
+        case "Soft White":
+        hue = 23
+        saturation = 56
+        break;
+        case "Warm White":
+        hue = 20
+        saturation = 80
+        break;
+        case "Blue":
+        hue = 70
+        saturation = 100
+        break;
+        case "Green":
+        hue = 39
+        saturation = 100
+        break;
+        case "Yellow":
+        hue = 25
+        saturation = 100
+        break;
+        case "Orange":
+        hue = 10
+        saturation = 100
+        break;
+        case "Purple":
+        hue = 75
+        saturation = 100
+        break;
+        case "Pink":
+        hue = 83
+        saturation = 100
+        break;
+        case "Red":
+        hue = 100
+        saturation = 100
+        break;
+    }
+    def newColorValue = [hue: hue, saturation: 100, level: (level as Integer) ?: 100]
+    def newValue = [hue: hue, saturation: 100]
+    log.debug "new color value = $newColorValue"
+    log.debug "new value = $newValue"
+	getDeviceCapabilities()
+	lights.each {light ->              
+        def type = state.lightCapabilities[light.id]
+        if (type == "level") {
+            if (level != null) {
+				light.setLevel(newColorValue.level)
+				light.setLevel(newColorValue.level)
+			}
+		}
+		else if (type == "color") {
+			if (level != null) {
+				light.setColor(newColorValue)
+				light.setColor(newColorValue)
+			}
+			else {
+                light.setColor(newValue)
+                light.setColor(newValue)
+			}
+		}
+		else {
+            if (level != null) {
+				light.setLevel(newColorValue.level)
+				light.setLevel(newColorValue.level)
+			}
+		}
+	}
 	setTimer()
 }
 
@@ -179,7 +205,48 @@ def setTimer() {
 }
 
 def resetHue() {
-	lights.each {
-		it.setColor(state.previous[it.id])        
+	lights.each {light ->
+		def type = state.lightCapabilities[light.id]
+        log.info state.previous[light.id].switch
+		if (type == "level") {
+            if (state.previous[light.id].switch == "off") {
+				light.off()
+				light.off()
+			}
+            else {
+            	light.setLevel(state.previous[light.id].level)
+				light.setLevel(state.previous[light.id].level)
+			}
+		}
+		else if (type == "color") {
+            light.setColor(state.previous[light.id])
+            light.setColor(state.previous[light.id])
+		}
+		else {
+            if (state.previous[light.id].switch == "off") {
+				light.off()
+				light.off()
+			}
+            else {
+            	light.setLevel(state.previous[light.id].level)
+				light.setLevel(state.previous[light.id].level)
+			}
+		}
 	}
+}
+
+private getDeviceCapabilities() {
+	def caps = [:]
+	lights.each {light ->
+		if (light.hasCapability("Color Control")) {
+			caps[light.id] = "color"
+		}
+		else if (light.hasCapability("Switch Level")) {
+			caps[light.id] = "level"
+		}
+		else {
+			caps[light.id] = "switch"
+		}
+	}
+	state.lightCapabilities = caps
 }
