@@ -104,63 +104,63 @@ private takeAction(evt) {
 		"color": light.currentValue("color")]
 	}
 	log.debug "current values = $state.previous"
-    def hue = 23
-    def saturation = 56
-    switch(settings."color") {
-        case "White":
-        hue = 52
-        saturation = 19
-        break;
-        case "Daylight":
-        hue = 53
-        saturation = 91
-        break;
-        case "Soft White":
-        hue = 23
-        saturation = 56
-        break;
-        case "Warm White":
-        hue = 20
-        saturation = 80
-        break;
-        case "Blue":
-        hue = 70
-        saturation = 100
-        break;
-        case "Green":
-        hue = 39
-        saturation = 100
-        break;
-        case "Yellow":
-        hue = 25
-        saturation = 100
-        break;
-        case "Orange":
-        hue = 10
-        saturation = 100
-        break;
-        case "Purple":
-        hue = 75
-        saturation = 100
-        break;
-        case "Pink":
-        hue = 83
-        saturation = 100
-        break;
-        case "Red":
-        hue = 100
-        saturation = 100
-        break;
-    }
-    def newColorValue = [hue: hue, saturation: 100, level: (level as Integer) ?: 100]
-    def newValue = [hue: hue, saturation: 100]
-    log.debug "new color value = $newColorValue"
-    log.debug "new value = $newValue"
+	def hue = 23
+	def saturation = 56
+	switch(settings."color") {
+		case "White":
+		hue = 52
+		saturation = 19
+		break;
+		case "Daylight":
+		hue = 53
+		saturation = 91
+		break;
+		case "Soft White":
+		hue = 23
+		saturation = 56
+		break;
+		case "Warm White":
+		hue = 20
+		saturation = 80
+		break;
+		case "Blue":
+		hue = 70
+		saturation = 100
+		break;
+		case "Green":
+		hue = 39
+		saturation = 100
+		break;
+		case "Yellow":
+		hue = 25
+		saturation = 100
+		break;
+		case "Orange":
+		hue = 10
+		saturation = 100
+		break;
+		case "Purple":
+		hue = 75
+		saturation = 100
+		break;
+		case "Pink":
+		hue = 83
+		saturation = 100
+		break;
+		case "Red":
+		hue = 100
+		saturation = 100
+		break;
+	}
+	def newColorValue = [hue: hue, saturation: 100, level: (level as Integer) ?: 100]
+	def newValue = [hue: hue, saturation: 100]
+	log.debug "new color value = $newColorValue"
+	log.debug "new value = $newValue"
 	getDeviceCapabilities()
 	lights.each {light ->              
-        def type = state.lightCapabilities[light.id]
-        if (type == "level") {
-            if (level != null) {
+		def type = state.lightCapabilities[light.id]
+		if (type == "level") {
+			if (level != null) {
 				light.setLevel(newColorValue.level)
 				light.setLevel(newColorValue.level)
 			}
@@ -171,12 +171,12 @@ private takeAction(evt) {
 				light.setColor(newColorValue)
 			}
 			else {
-                light.setColor(newValue)
-                light.setColor(newValue)
+				light.setColor(newValue)
+				light.setColor(newValue)
 			}
 		}
 		else {
-            if (level != null) {
+			if (level != null) {
 				light.setLevel(newColorValue.level)
 				light.setLevel(newColorValue.level)
 			}
@@ -207,28 +207,28 @@ def setTimer() {
 def resetHue() {
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
-        log.info state.previous[light.id].switch
+		log.info state.previous[light.id].switch
 		if (type == "level") {
-            if (state.previous[light.id].switch == "off") {
+			if (state.previous[light.id].switch == "off") {
 				light.off()
 				light.off()
 			}
-            else {
-            	light.setLevel(state.previous[light.id].level)
+			else {
+				light.setLevel(state.previous[light.id].level)
 				light.setLevel(state.previous[light.id].level)
 			}
 		}
 		else if (type == "color") {
-            light.setColor(state.previous[light.id])
-            light.setColor(state.previous[light.id])
+			light.setColor(state.previous[light.id])
+			light.setColor(state.previous[light.id])
 		}
 		else {
-            if (state.previous[light.id].switch == "off") {
+			if (state.previous[light.id].switch == "off") {
 				light.off()
 				light.off()
 			}
-            else {
-            	light.setLevel(state.previous[light.id].level)
+			else {
+				light.setLevel(state.previous[light.id].level)
 				light.setLevel(state.previous[light.id].level)
 			}
 		}
