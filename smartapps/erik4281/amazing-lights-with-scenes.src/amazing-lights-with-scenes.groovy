@@ -215,10 +215,10 @@ def eventHandler(evt) {
 def eventOffHandler(evt) {
 	log.trace "eventHandler: $evt.name: $evt.value"
 	state.eventStopTime = now()
-	if (evt.name == "switch" && evt.value == "off") {
+	if (evt.name == "switch" && evt.value == "off" && moodOk) {
 		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 	}
-	else if (switchOk && modeOk && daysOk && timeOk) {
+	else if (switchOk && modeOk && daysOk && timeOk && moodOk) {
 		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 		}
@@ -229,13 +229,13 @@ def eventOffHandler(evt) {
 			turnOffAfterDelay()
 		}
 	}
-	else if (switchOk) {
+	else if (switchOk && moodOk) {
 		runIn(30*60, turnOffAfterDelay, [overwrite: false])
 	}
 }
 
 def illuminanceHandler(evt) {
-	if (modeOk && daysOk && timeOk) {
+	if (modeOk && daysOk && timeOk && moodOk) {
 		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
 			deactivateHue()
 		}
