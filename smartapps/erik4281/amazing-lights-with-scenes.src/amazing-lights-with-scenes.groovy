@@ -79,9 +79,11 @@ def switchPage() {
 
 def scenesPage() {
 	def sceneId = getTiming()
+    state.sceneId = sceneId
+	log.debug "Current SceneId = ${sceneId}"
 	dynamicPage(name: "scenesPage") {
 		section {
-			for (num in 1..6) {
+			for (num in 1..8) {
 				href "optionsPage", title: "${num}. ${sceneName(num)}${sceneId==num ? ' (current)' : ''}", params: [sceneId:num], description: "", state: sceneIsDefined(num) ? "complete" : "incomplete"
 			}
 		}
@@ -90,8 +92,8 @@ def scenesPage() {
 
 def optionsPage(params=[:]) {
 	log.debug "optionsPage($params)"
-	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
-	state.lastDisplayedSceneId = sceneId
+	def sceneId = params.sceneId as Integer ?: state.sceneId
+    state.sceneId = sceneId
 	dynamicPage(name:"optionsPage", title: "${sceneId}. ${sceneName(sceneId)}") {
 		section {
 			input "sceneName${sceneId}", "text", title: "Scene Name", required: false
@@ -113,7 +115,7 @@ def optionsPage(params=[:]) {
 
 def devicePage(params) {
 	getDeviceCapabilities()
-	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
+	def sceneId = params.sceneId as Integer ?: state.sceneId
 	dynamicPage(name: "devicePage") {
 		section {
 			input "sceneName${sceneId}", "text", title: "Scene Name", required: false
@@ -312,7 +314,7 @@ private activateHue() {
 	state.lastStatus = "on"
 	getDeviceCapabilities()
 	getTiming()
-	def sceneId = state.lastDisplayedSceneId
+	def sceneId = state.sceneId
 	log.info "FINALLY SELECTED SCENE = $sceneId"
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
@@ -414,18 +416,16 @@ private deactivateHue() {
  ******************/
 
 private getTiming() {
-	def sceneId = params.sceneId as Integer ?: state.lastDisplayedSceneId
-	state.selectedSceneId = 1
-	sceneId = state.selectedSceneId   
-	state.lastDisplayedSceneId = sceneId
-	state.modeChecker = modes_1
-	state.dayChecker = days_1
+	def sceneId = params.sceneId as Integer ?: state.sceneId
+    log.info "sceneId = ${sceneId}"
+    state.modeChecker = modes_1
+    state.dayChecker = days_1
 	state.startingChecker = starting_1
 	state.endingChecker = ending_1
 	state.switchOnChecker = switchOn_1
 	state.switchOffChecker = switchOff_1
 	log.debug "checking scene 1"
-	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName1) {
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName1) {
 		state.selectedSceneId = 1
 		log.info sceneName1
 	}
@@ -435,9 +435,8 @@ private getTiming() {
 	state.endingChecker = ending_2
 	state.switchOnChecker = switchOn_2
 	state.switchOffChecker = switchOff_2
-
 	log.debug "checking scene 2"
-	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName2) {
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName2) {
 		state.selectedSceneId = 2
 		log.info sceneName2
 	}
@@ -447,9 +446,8 @@ private getTiming() {
 	state.endingChecker = ending_3
 	state.switchOnChecker = switchOn_3
 	state.switchOffChecker = switchOff_3
-
 	log.debug "checking scene 3"
-	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName3) {
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName3) {
 		state.selectedSceneId = 3
 		log.info sceneName3
 	}
@@ -459,9 +457,8 @@ private getTiming() {
 	state.endingChecker = ending_4
 	state.switchOnChecker = switchOn_4
 	state.switchOffChecker = switchOff_4
-
 	log.debug "checking scene 4"
-	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName4) {
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName4) {
 		state.selectedSceneId = 4
 		log.info sceneName4
 	}
@@ -471,9 +468,8 @@ private getTiming() {
 	state.endingChecker = ending_5
 	state.switchOnChecker = switchOn_5
 	state.switchOffChecker = switchOff_5
-
 	log.debug "checking scene 5"
-	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName5) {
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName5) {
 		state.selectedSceneId = 5
 		log.info sceneName5
 	}
@@ -483,14 +479,35 @@ private getTiming() {
 	state.endingChecker = ending_6
 	state.switchOnChecker = switchOn_6
 	state.switchOffChecker = switchOff_6
-
 	log.debug "checking scene 6"
-	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName6) {
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName6) {
 		state.selectedSceneId = 6
 		log.info sceneName6
 	}
-	sceneId = state.selectedSceneId
-	state.lastDisplayedSceneId = sceneId
+	state.modeChecker = modes_7
+	state.dayChecker = days_7
+	state.startingChecker = starting_7
+	state.endingChecker = ending_7
+	state.switchOnChecker = switchOn_7
+	state.switchOffChecker = switchOff_7
+	log.debug "checking scene 7"
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName7) {
+		state.selectedSceneId = 7
+		log.info sceneName7
+	}
+	state.modeChecker = modes_8
+	state.dayChecker = days_8
+	state.startingChecker = starting_8
+	state.endingChecker = ending_8
+	state.switchOnChecker = switchOn_8
+	state.switchOffChecker = switchOff_8
+	log.debug "checking scene 8"
+	if (modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene && sceneName8) {
+		state.selectedSceneId = 8
+		log.info sceneName8
+	}
+    sceneId = state.selectedSceneId
+	state.sceneId = sceneId
 }
 
 private closestLevel(level) {
@@ -537,7 +554,7 @@ private Boolean sceneIsDefined(sceneId) {
 }
 
 private sceneName(num) {
-	final names = ["UNDEFINED","One","Two","Three","Four","Five","Six"]
+	final names = ["UNDEFINED","One","Two","Three","Four","Five","Six","Seven","Eight"]
 	settings."sceneName${num}" ?: "Scene ${names[num]}"
 }
 
@@ -686,7 +703,7 @@ private getTimeOkScene() {
 }
 
 private getSwitchOnScene() {
-	def switchOn = state.switchOnChecker
+    def switchOn = state.switchOnChecker
 	def result = true
 	if (switchOn) {
 		def current = switchOn.currentValue('switch')
@@ -701,7 +718,7 @@ private getSwitchOnScene() {
 	else {
 		result = true
 	}
-	log.trace "switchOnScene = $result"
+    log.trace "switchOnScene = $result"
 	result
 }
 
@@ -724,16 +741,3 @@ private getSwitchOffScene() {
 	log.trace "switchOffScene = $result"
 	result
 }
-
-//private hhmm(time, fmt = "h:mm a")
-//{
-//	def t = timeToday(time, location.timeZone)
-//	def f = new java.text.SimpleDateFormat(fmt)
-//	f.setTimeZone(location.timeZone ?: timeZone(time))
-//	f.format(t)
-//}
-//
-//private timeIntervalLabel()
-//{
-//	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
-//}
