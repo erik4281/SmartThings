@@ -100,11 +100,13 @@ def optionsPage(params=[:]) {
 			href "devicePage", title: "Show Device States", params: [sceneId:sceneId], description: "", state: sceneIsDefined(sceneId) ? "complete" : "incomplete"
 		}
 		section("Timing options") {
-			input "starting_${sceneId}", "time", title: "Starting from", required: false
-			input "ending_${sceneId}", "time", title: "Ending at", required: false
+			input "starting_${sceneId}", "time", title: "Only starting from", required: false
+			input "ending_${sceneId}", "time", title: "Only ending at", required: false
 			input "days_${sceneId}", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 			input "modes_${sceneId}", "mode", title: "Only when mode is", multiple: true, required: false
+			input "switchOn_${sceneId}", "capability.switch", title: "Only when switch is ON", required: false, multiple: true
+			input "switchOff_${sceneId}", "capability.switch", title: "Only when switch is OFF", required: false, multiple: true
 		}
 	}
 }
@@ -218,7 +220,7 @@ def eventOffHandler(evt) {
 	if (evt.name == "switch" && evt.value == "off" && moodOk) {
 		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 	}
-	else if (switchOk && modeOk && daysOk && timeOk && moodOk) {
+	else if (switchOff && modeOk && daysOk && timeOk && moodOk) {
 		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 		}
@@ -229,7 +231,7 @@ def eventOffHandler(evt) {
 			turnOffAfterDelay()
 		}
 	}
-	else if (switchOk && moodOk) {
+	else if (switchOff && moodOk) {
 		runIn(30*60, turnOffAfterDelay, [overwrite: false])
 	}
 }
@@ -240,7 +242,7 @@ def illuminanceHandler(evt) {
 			deactivateHue()
 		}
 		else if (state.eventStopTime) {
-			if (state.lastStatus != "off" && switchOk) {
+			if (state.lastStatus != "off" && switchOff) {
 				def elapsed = now() - state.eventStopTime                
 				if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 					if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
@@ -253,7 +255,7 @@ def illuminanceHandler(evt) {
 					}
 				}
 			}
-				else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOk != true) {
+				else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
 				activateHue()
 			}
 		}
@@ -310,20 +312,12 @@ private activateHue() {
 	state.lastStatus = "on"
 	getDeviceCapabilities()
 	getTiming()
-	//log.info "state: ${state.lastDisplayedSceneId}"
 	def sceneId = state.lastDisplayedSceneId
 	log.info "FINALLY SELECTED SCENE = $sceneId"
-	//log.info "state: ${state.lastDisplayedSceneId}"
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.info "Light on: ${settings."onoff_${sceneId}_${light.id}"}"
-		if (isOn) {
-			light.on()
-		}
-		else {
-			light.off()
-		}
 		if (type != "switch" && moodOk) {
 			def level = switchLevel(sceneId, light)
 			if (type == "level") {
@@ -395,6 +389,12 @@ private activateHue() {
 		}	
 		else {
 		}		
+		if (isOn) {
+			light.on()
+		}
+		else {
+			light.off()
+		}
 	}
 }
 
@@ -422,8 +422,10 @@ private getTiming() {
 	state.dayChecker = days_1
 	state.startingChecker = starting_1
 	state.endingChecker = ending_1
+	state.switchOnChecker = switchOn_1
+	state.switchOffChecker = switchOff_1
 	log.debug "checking scene 1"
-	if (timeOkScene && modeOkScene && daysOkScene && sceneName1) {
+	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName1) {
 		state.selectedSceneId = 1
 		log.info sceneName1
 	}
@@ -431,8 +433,11 @@ private getTiming() {
 	state.dayChecker = days_2
 	state.startingChecker = starting_2
 	state.endingChecker = ending_2
+	state.switchOnChecker = switchOn_2
+	state.switchOffChecker = switchOff_2
+
 	log.debug "checking scene 2"
-	if (timeOkScene && modeOkScene && daysOkScene && sceneName2) {
+	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName2) {
 		state.selectedSceneId = 2
 		log.info sceneName2
 	}
@@ -440,8 +445,11 @@ private getTiming() {
 	state.dayChecker = days_3
 	state.startingChecker = starting_3
 	state.endingChecker = ending_3
+	state.switchOnChecker = switchOn_3
+	state.switchOffChecker = switchOff_3
+
 	log.debug "checking scene 3"
-	if (timeOkScene && modeOkScene && daysOkScene && sceneName3) {
+	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName3) {
 		state.selectedSceneId = 3
 		log.info sceneName3
 	}
@@ -449,8 +457,11 @@ private getTiming() {
 	state.dayChecker = days_4
 	state.startingChecker = starting_4
 	state.endingChecker = ending_4
+	state.switchOnChecker = switchOn_4
+	state.switchOffChecker = switchOff_4
+
 	log.debug "checking scene 4"
-	if (timeOkScene && modeOkScene && daysOkScene && sceneName4) {
+	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName4) {
 		state.selectedSceneId = 4
 		log.info sceneName4
 	}
@@ -458,8 +469,11 @@ private getTiming() {
 	state.dayChecker = days_5
 	state.startingChecker = starting_5
 	state.endingChecker = ending_5
+	state.switchOnChecker = switchOn_5
+	state.switchOffChecker = switchOff_5
+
 	log.debug "checking scene 5"
-	if (timeOkScene && modeOkScene && daysOkScene && sceneName5) {
+	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName5) {
 		state.selectedSceneId = 5
 		log.info sceneName5
 	}
@@ -467,8 +481,11 @@ private getTiming() {
 	state.dayChecker = days_6
 	state.startingChecker = starting_6
 	state.endingChecker = ending_6
+	state.switchOnChecker = switchOn_6
+	state.switchOffChecker = switchOff_6
+
 	log.debug "checking scene 6"
-	if (timeOkScene && modeOkScene && daysOkScene && sceneName6) {
+	if (timeOkScene && modeOkScene && daysOkScene && switchOnScene && switchOffScene && sceneName6) {
 		state.selectedSceneId = 6
 		log.info sceneName6
 	}
@@ -528,7 +545,7 @@ private sceneName(num) {
  * Checks  *
  ***********/
 
-private getSwitchOk() {
+private getSwitchOff() {
 	def result = true
 	if (inputSwitch) {
 		def current = inputSwitch.currentValue('switch')
@@ -543,7 +560,7 @@ private getSwitchOk() {
 	else {
 		result = true
 	}
-	log.trace "switchOk = $result"
+	log.trace "switchOff = $result"
 	result
 }
 
@@ -665,6 +682,46 @@ private getTimeOkScene() {
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 	log.trace "timeOkScene = $result"
+	result
+}
+
+private getSwitchOnScene() {
+	def switchOn = state.switchOnChecker
+	def result = true
+	if (switchOn) {
+		def current = switchOn.currentValue('switch')
+		def switchOnValue = switchOn.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene = $result"
+	result
+}
+
+private getSwitchOffScene() {
+	def switchOff = state.switchOffChecker
+	def result = true
+	if (switchOff) {
+		def current = switchOff.currentValue('switch')
+		def switchOffValue = switchOff.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene = $result"
 	result
 }
 
