@@ -165,7 +165,7 @@ def initialize() {
 	subscribe(contactSensor, "contact.open", eventHandler)
 	subscribe(inputSwitch, "switch.on", eventHandler)
 	subscribe(motionSensor, "motion.inactive", eventOffHandler)
-	subscribe(contactSensor, "contact.close", eventOffHandler)
+	subscribe(contactSensor, "contact.closed", eventOffHandler)
 	subscribe(inputSwitch, "switch.off", eventOffHandler)
 	if (lightSensor) {
 		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])

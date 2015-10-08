@@ -35,6 +35,7 @@ definition(
 preferences {
 	section ("Sleep mode...") {
 		input "sleepMode", "mode", title: "Change mode to?", required: true
+		input "sleepAlarm", "enum", title: "Set SHM mode to?" , required: false, multiple:false, options: ["off","stay","away"]
 		input "sleepOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "sleepOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
         input "sleepMotion", "capability.motionSensor", title: "If no motion here", required: false, multiple: true
@@ -45,6 +46,7 @@ preferences {
 	}
 	section ("Wake up mode...") {
 		input "wakeUpMode", "mode", title: "Change mode to?", required: true
+		input "wakeAlarm", "enum", title: "Set SHM mode to?" , required: false, multiple:false, options: ["off","stay","away"]
 		input "wakeUpOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "wakeUpOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
         input "wakeUpMotion", "capability.motionSensor", title: "If motion here", required: false, multiple: true
@@ -135,19 +137,20 @@ def goToSleep() {
 def startSleepMode() {
     log.info "NOW Executing sleep handler."
     log.info "Now sending SLEEP notification"
-    sendNotificationEvent("Home-mode set to '${sleepMode}'.")
+    sendNotificationEvent("Alarm switched on and home set to Sleep-mode.")
     changeMode(sleepMode)
+    if (sleepAlarm) {
+		sendLocationEvent(name: "alarmSystemStatus", value: sleepAlarm)
+    }
     if (sleepOn) {
         sleepOn.each {light ->
         	light.on()
         }
-        //sleepOn.on()
     }
     if (sleepOff) {
         sleepOff.each {light ->
         	light.off()
         }
-        //sleepOff.off()
     }
 }
 
@@ -159,19 +162,20 @@ def goToWake() {
 def startWakeMode() {
     log.info "NOW Executing wake handler."
     log.info "Now sending WAKE notification"
-    sendNotificationEvent("Home-mode set to '${wakeUpMode}'.")
+    sendNotificationEvent("Alarm switched off and home set to Home-mode.")
     changeMode(wakeUpMode)
+    if (wakeAlarm) {
+		sendLocationEvent(name: "alarmSystemStatus", value: wakeAlarm)
+    }
     if (wakeUpOn) {
         wakeUpOn.each {light ->
         	light.on()
         }
-        //wakeUpOn.on()
     }
     if (wakeUpOff) {
         wakeUpOff.each {light ->
         	light.off()
         }
-        //wakeUpOff.off()
     }
 }
 
