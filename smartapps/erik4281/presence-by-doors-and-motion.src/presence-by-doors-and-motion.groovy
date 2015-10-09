@@ -144,10 +144,10 @@ def changeAway() {
         	sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
         }
         if (pushOn == "Yes") {
-        	sendPush("Home alarm switched on and home set to Away-mode.")
+        	sendPush("Alarm switched on and home set to Away-mode.")
         }
         else {
-        	sendNotificationEvent("Home alarm switched on and home set to Away-mode.")
+        	sendNotificationEvent("Alarm switched on and home set to Away-mode.")
         }
 		if (awayOn) {	
 			awayOn.each {light ->
