@@ -137,7 +137,7 @@ def goToSleep() {
 def startSleepMode() {
     log.info "NOW Executing sleep handler."
     log.info "Now sending SLEEP notification"
-    sendNotificationEvent("Alarm switched on and home set to Sleep-mode.")
+    sendNotificationEvent("Sleep: Alarm switched on.")
     changeMode(sleepMode)
     if (sleepAlarm) {
 		sendLocationEvent(name: "alarmSystemStatus", value: sleepAlarm)
@@ -162,7 +162,7 @@ def goToWake() {
 def startWakeMode() {
     log.info "NOW Executing wake handler."
     log.info "Now sending WAKE notification"
-    sendNotificationEvent("Alarm switched off and home set to Home-mode.")
+    sendNotificationEvent("Wake: Alarm switched off.")
     changeMode(wakeUpMode)
     if (wakeAlarm) {
 		sendLocationEvent(name: "alarmSystemStatus", value: wakeAlarm)

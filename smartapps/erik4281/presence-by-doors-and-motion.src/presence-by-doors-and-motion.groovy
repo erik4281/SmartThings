@@ -37,8 +37,11 @@ preferences {
 		input "contactSensor", "capability.contactSensor", title: "Contact opens", required: true, multiple: false
 	}
 	section("... and this motion sensor(s)...") {
-		input "motionSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
+		input "motionSensor", "capability.motionSensor", title: "Motion here", required: true, multiple: true
 	}
+    section("...override presence with these sensor(s)") {
+        input "overrideSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
+    }
     section("Switch to this mode for home...") {
     	input "homeMode", "mode", title: "Change mode to?", required: true
 		input "homeAlarm", "enum", title: "Set SHM mode to?" , required: false, multiple:false, options: ["off","stay","away"]
@@ -54,6 +57,9 @@ preferences {
     section("Use this delay for away mode...") {
     	input "delayMinutes", "number", title: "Change after X minutes", required: true
 	}
+    section("Also monitor for sleepmode (to enable away from sleep") {
+        input "sleepMode", "mode", title: "Monitor sleep-mode", required: false, multiple: true
+    }
     section("Send PUSH...") {
     	input "pushOn", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: true
 	}
@@ -76,6 +82,8 @@ def updated() {
 
 def initialize() {
 	subscribe(motionSensor, "motion.active", motionActiveHandler)
+    subscribe(motionSensor, "motion.inactive", motionInactiveHandler)
+    //subscribe(overrideSensor, "motion.active", overrideActiveHandler)
     subscribe(contactSensor, "contact.open", contactOpenHandler)
     subscribe(contactSensor, "contact.closed", contactCloseHandler)
 }
@@ -87,18 +95,46 @@ def initialize() {
 def motionActiveHandler(evt) {
 	log.debug "motionActiveHandler"
     state.motionState = "active"
+    log.info state.motionState
+    if (overrideSensor) {
+		def current = overrideSensor.currentValue('motion')
+		def overrideValue = overrideSensor.find{it.currentMotion == "active"}
+        if (overrideValue) {
+			changeHome()
+		}
+	}
 }
 
+def motionInactiveHandler(evt) {
+    log.debug "motionInactiveHandler"
+    if (motionOk) {
+        state.motionState = "active"
+    }
+    else { 
+        state.motionState = "inactive"
+    }
+    log.info state.motionState
+}
+
+//def overrideActiveHandler(evt) {
+//	log.debug "overrideActiveHandler"
+//    state.motionState = "active"
+//    log.info state.motionState
+//    changeHome()
+//}
+
 def contactOpenHandler(evt) {
-	log.debug "contactOpenHandler"
+    log.debug "contactOpenHandler"
     state.contactState = "open"
-	changeHome()
+	log.info state.contactState
+    changeHome()
 }
 
 def contactCloseHandler(evt) {
 	log.debug "contactCloseHandler"
     state.contactState = "closed"
-	state.motionState = "inactive"
+    log.info state.contactState
+    //runIn(60, alarmNotify, [overwrite: false])
 	runIn((delayMinutes*60), changeAway, [overwrite: false])
 }
 
@@ -106,9 +142,20 @@ def contactCloseHandler(evt) {
  * Actuator methods *
  ********************/
 
+//def alarmNotify() {
+//    if (state.contactState == "closed" && state.motionState == "inactive" && homeModeOk) {
+//        if (pushOn == "Yes") {
+//            sendPush("Preparing to switch on alarm.")
+//        }
+//        else {
+//            sendNotificationEvent("Preparing to switch on alarm.")
+//        }       
+//    }
+//}
+
 def changeHome() {
-	log.debug "Changing home mode"
-    if (state.contactState == "open" && awayModeOk) {
+	log.debug "Change home mode"
+    if (awayModeOk) {
     	log.debug "Changing to home"
         state.awayState = "home"
         changeMode(homeMode)
@@ -116,10 +163,10 @@ def changeHome() {
         	sendLocationEvent(name: "alarmSystemStatus", value: homeAlarm)
         }
         if (pushOn == "Yes") {
-        	sendPush("Alarm switched off and home set to Home-mode.")
+        	sendPush("Arrive: Alarm switched off.")
         }
         else {
-        	sendNotificationEvent("Alarm switched off and home set to Home-mode.")
+        	sendNotificationEvent("Arrive: Alarm switched off.")
         }
 		if (homeOn) {	
 			homeOn.each {light ->
@@ -135,8 +182,8 @@ def changeHome() {
 }
 
 def changeAway() {
-	log.debug "Changing away mode"
-	if (state.contactState == "closed" && state.motionState == "inactive" && homeModeOk) {
+	log.debug "Change away mode"
+	if (state.contactState == "closed" && state.motionState == "inactive" && (homeModeOk || sleepModeOk)) {
 		log.debug "Changing to away"
         state.awayState = "away"
         changeMode(awayMode)
@@ -144,10 +191,10 @@ def changeAway() {
         	sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
         }
         if (pushOn == "Yes") {
-        	sendPush("Alarm switched on and home set to Away-mode.")
+        	sendPush("Leave: Alarm switched on.")
         }
         else {
-        	sendNotificationEvent("Alarm switched on and home set to Away-mode.")
+        	sendNotificationEvent("Leave: Alarm switched on.")
         }
 		if (awayOn) {	
 			awayOn.each {light ->
@@ -192,5 +239,27 @@ private getHomeModeOk() {
 	result
 }
 
+private getSleepModeOk() {
+   def result = sleepMode.containt(location.mode)
+   log.trace "SleepModeOk = $result"
+   result
+}
 
-
+private getMotionOk() {
+	def result = true
+	if (motionSensor) {
+		def current = motionSensor.currentValue('motion')
+		def motionValue = motionSensor.find{it.currentMotion == "active"}
+        if (motionValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "motionOk = $result"
+	result
+}
