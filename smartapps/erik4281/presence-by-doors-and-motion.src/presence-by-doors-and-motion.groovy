@@ -83,7 +83,6 @@ def updated() {
 def initialize() {
 	subscribe(motionSensor, "motion.active", motionActiveHandler)
     subscribe(motionSensor, "motion.inactive", motionInactiveHandler)
-    //subscribe(overrideSensor, "motion.active", overrideActiveHandler)
     subscribe(contactSensor, "contact.open", contactOpenHandler)
     subscribe(contactSensor, "contact.closed", contactCloseHandler)
 }
@@ -116,13 +115,6 @@ def motionInactiveHandler(evt) {
     log.info state.motionState
 }
 
-//def overrideActiveHandler(evt) {
-//	log.debug "overrideActiveHandler"
-//    state.motionState = "active"
-//    log.info state.motionState
-//    changeHome()
-//}
-
 def contactOpenHandler(evt) {
     log.debug "contactOpenHandler"
     state.contactState = "open"
@@ -134,24 +126,12 @@ def contactCloseHandler(evt) {
 	log.debug "contactCloseHandler"
     state.contactState = "closed"
     log.info state.contactState
-    //runIn(60, alarmNotify, [overwrite: false])
-	runIn((delayMinutes*60), changeAway, [overwrite: false])
+	runIn((delayMinutes*60), changeAway, [overwrite: true])
 }
 
 /********************
  * Actuator methods *
  ********************/
-
-//def alarmNotify() {
-//    if (state.contactState == "closed" && state.motionState == "inactive" && homeModeOk) {
-//        if (pushOn == "Yes") {
-//            sendPush("Preparing to switch on alarm.")
-//        }
-//        else {
-//            sendNotificationEvent("Preparing to switch on alarm.")
-//        }       
-//    }
-//}
 
 def changeHome() {
 	log.debug "Change home mode"
