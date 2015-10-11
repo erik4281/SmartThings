@@ -320,7 +320,13 @@ private activateHue() {
 		def type = state.lightCapabilities[light.id]
 		def isOn = settings."onoff_${sceneId}_${light.id}" == "true" ? true : false
 		log.info "Light on: ${settings."onoff_${sceneId}_${light.id}"}"
-		if (type != "switch" && moodOk) {
+		if (isOn) {
+			light.on()
+		}
+		else {
+			light.off()
+		}
+        if (type != "switch" && moodOk) {
 			def level = switchLevel(sceneId, light)
 			if (type == "level") {
 				if (level != null) {
@@ -390,12 +396,6 @@ private activateHue() {
 			}
 		}	
 		else {
-		}		
-		if (isOn) {
-			light.on()
-		}
-		else {
-			light.off()
 		}
 	}
 }
