@@ -19,14 +19,14 @@
  ************/
 
 definition(
-    name: "Sleep Motion detect",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Automatically set mode to sleep or day/night in the evening and morning, based on motion sensors. ",
-    category: "SmartThings Labs",
-    iconUrl: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png",
-    iconX2Url: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png",
-    iconX3Url: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png")
+	name: "Sleep Motion detect",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Automatically set mode to sleep or day/night in the evening and morning, based on motion sensors. ",
+	category: "SmartThings Labs",
+	iconUrl: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png",
+	iconX2Url: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png",
+	iconX3Url: "http://icons.iconarchive.com/icons/arrioch/birdie-adium/128/Adium-Bird-Sleep-icon.png")
 
 /**********
  * Setup  *
@@ -37,20 +37,20 @@ preferences {
 		input "sleepMode", "mode", title: "Change mode to?", required: true
 		input "sleepOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "sleepOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
-        input "sleepMotion", "capability.motionSensor", title: "If no motion here", required: false, multiple: true
-        input "sleepDelay", "number", title: "For x minutes", required: false
-        input "sleepStarting", "time", title: "Starting from", required: false
-        input "sleepEnding", "time", title: "Ending at", required: false
-        input "sleepModeCheck", "mode", title: "Only when mode is", multiple: true, required: false
+		input "sleepMotion", "capability.motionSensor", title: "If no motion here", required: false, multiple: true
+		input "sleepDelay", "number", title: "For x minutes", required: false
+		input "sleepStarting", "time", title: "Starting from", required: false
+		input "sleepEnding", "time", title: "Ending at", required: false
+		input "sleepModeCheck", "mode", title: "Only when mode is", multiple: true, required: false
 	}
 	section ("Wake up mode...") {
 		input "wakeUpMode", "mode", title: "Change mode to?", required: true
 		input "wakeUpOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "wakeUpOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
-        input "wakeUpMotion", "capability.motionSensor", title: "If motion here", required: false, multiple: true
-        input "wakeUpStarting", "time", title: "Starting from", required: false
-        input "wakeUpEnding", "time", title: "Ending at", required: false
-        input "wakeUpModeCheck", "mode", title: "Only when mode is", multiple: true, required: false
+		input "wakeUpMotion", "capability.motionSensor", title: "If motion here", required: false, multiple: true
+		input "wakeUpStarting", "time", title: "Starting from", required: false
+		input "wakeUpEnding", "time", title: "Ending at", required: false
+		input "wakeUpModeCheck", "mode", title: "Only when mode is", multiple: true, required: false
 	}
 }
 
@@ -67,7 +67,7 @@ def updated() {
 	log.debug "Updated with settings: ${settings}"
 	unsubscribe()
 	unschedule()
-    initialize()
+	initialize()
 }
 
 def initialize() {
@@ -84,19 +84,19 @@ def sleepHandler(evt) {
 	def current = sleepMotion.currentValue("motion")
 	def motionValue = sleepMotion.find{it.currentMotion == "active"}
 	if (motionValue) {
-    	log.info "Motion, so not ready to sleep"
+		log.info "Motion, so not ready to sleep"
 		state.motionStopTime = null
 	}
 	else {
-    	log.info "No Motion, so getting ready to go to sleep whenever the time is there"
-        state.motionStopTime = now()
-        if(sleepDelay) {
-            runIn(sleepDelay*60, goToSleep, [overwrite: false])
-            log.info "Delay (motion): $sleepDelay minutes"
-        } 
-        else {
-            goToSleep()
-        }
+		log.info "No Motion, so getting ready to go to sleep whenever the time is there"
+		state.motionStopTime = now()
+		if(sleepDelay) {
+			runIn(sleepDelay*60, goToSleep, [overwrite: false])
+			log.info "Delay (motion): $sleepDelay minutes"
+		} 
+		else {
+			goToSleep()
+		}
 	}
 }
 
@@ -105,74 +105,74 @@ def wakeHandler(evt) {
 	def current = wakeUpMotion.currentValue("motion")
 	def motionValue = wakeUpMotion.find{it.currentMotion == "active"}
 	if (motionValue) {
-    	log.info "Motion, so will wake up if the time is there"
+		log.info "Motion, so will wake up if the time is there"
 		state.motionStopTime = null
-        if (allOkWake) {
-        	goToWake()
+		if (allOkWake) {
+			goToWake()
 		}
 	}
 	else {
-    	log.info "No Motion, so not ready to go to wake up"
-        state.motionStopTime = now()
-    }
+		log.info "No Motion, so not ready to go to wake up"
+		state.motionStopTime = now()
+	}
 }
 
 def goToSleep() {
 	log.trace "In goToSleep"
 	if (state.motionStopTime) {
-        if (allOkSleep) {
+		if (allOkSleep) {
 			def elapsed = now() - state.motionStopTime
-	        if (elapsed >= ((sleepDelay ?: 0) * 60000L) - 2000) {
-	        	startSleepMode()
+			if (elapsed >= ((sleepDelay ?: 0) * 60000L) - 2000) {
+				startSleepMode()
 			}
 		}
-        else {
-        	runIn (300, goToSleep)
-       	}
+		else {
+			runIn (300, goToSleep)
+		}
 	}
 }
 
 def startSleepMode() {
-    log.info "NOW Executing sleep handler."
-    log.info "Now sending SLEEP notification"
-    sendNotificationEvent("Home-mode set to '${sleepMode}'.")
-    changeMode(sleepMode)
-    if (sleepOn) {
-        sleepOn.each {light ->
-        	light.on()
-        }
-        //sleepOn.on()
-    }
-    if (sleepOff) {
-        sleepOff.each {light ->
-        	light.off()
-        }
-        //sleepOff.off()
-    }
+	log.info "NOW Executing sleep handler."
+	log.info "Now sending SLEEP notification"
+	sendNotificationEvent("Home-mode set to '${sleepMode}'.")
+	changeMode(sleepMode)
+	if (sleepOn) {
+		sleepOn.each {light ->
+			light.on()
+		}
+		//sleepOn.on()
+	}
+	if (sleepOff) {
+		sleepOff.each {light ->
+			light.off()
+		}
+		//sleepOff.off()
+	}
 }
 
 def goToWake() {
 	log.trace "In goToWake"
-    startWakeMode()
+	startWakeMode()
 }
 
 def startWakeMode() {
-    log.info "NOW Executing wake handler."
-    log.info "Now sending WAKE notification"
-    sendNotificationEvent("Home-mode set to '${wakeUpMode}'.")
-    changeMode(wakeUpMode)
-    if (wakeUpOn) {
-        wakeUpOn.each {light ->
-        	light.on()
-        }
-        //wakeUpOn.on()
-    }
-    if (wakeUpOff) {
-        wakeUpOff.each {light ->
-        	light.off()
-        }
-        //wakeUpOff.off()
-    }
+	log.info "NOW Executing wake handler."
+	log.info "Now sending WAKE notification"
+	sendNotificationEvent("Home-mode set to '${wakeUpMode}'.")
+	changeMode(wakeUpMode)
+	if (wakeUpOn) {
+		wakeUpOn.each {light ->
+			light.on()
+		}
+		//wakeUpOn.on()
+	}
+	if (wakeUpOff) {
+		wakeUpOff.each {light ->
+			light.off()
+		}
+		//wakeUpOff.off()
+	}
 }
 
 /******************
@@ -181,7 +181,7 @@ def startWakeMode() {
 
 def changeMode(newMode) {
 	log.info "Now changing to mode $newMode"
-    if (newMode && location.mode != newMode) {
+	if (newMode && location.mode != newMode) {
 		if (location.modes?.find{it.name == newMode}) {
 			setLocationMode(newMode)
 		}
