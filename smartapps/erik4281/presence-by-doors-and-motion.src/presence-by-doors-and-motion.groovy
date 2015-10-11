@@ -126,6 +126,7 @@ def contactCloseHandler(evt) {
 	log.debug "contactCloseHandler"
     state.contactState = "closed"
     log.info state.contactState
+    log.info "Changing to away in ${delayMinutes} minutes"
 	runIn((delayMinutes*60), changeAway, [overwrite: true])
 }
 
