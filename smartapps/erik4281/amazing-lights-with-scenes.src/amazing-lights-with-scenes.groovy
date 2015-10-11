@@ -79,7 +79,7 @@ def switchPage() {
 
 def scenesPage() {
 	def sceneId = getTiming()
-    state.sceneId = sceneId
+	state.sceneId = sceneId
 	log.debug "Current SceneId = ${sceneId}"
 	dynamicPage(name: "scenesPage") {
 		section {
@@ -93,7 +93,7 @@ def scenesPage() {
 def optionsPage(params=[:]) {
 	log.debug "optionsPage($params)"
 	def sceneId = params.sceneId as Integer ?: state.sceneId
-    state.sceneId = sceneId
+	state.sceneId = sceneId
 	dynamicPage(name:"optionsPage", title: "${sceneId}. ${sceneName(sceneId)}") {
 		section {
 			input "sceneName${sceneId}", "text", title: "Scene Name", required: false
@@ -718,7 +718,7 @@ private getSwitchOnScene() {
 	else {
 		result = true
 	}
-    log.trace "switchOnScene = $result"
+	log.trace "switchOnScene = $result"
 	result
 }
 
