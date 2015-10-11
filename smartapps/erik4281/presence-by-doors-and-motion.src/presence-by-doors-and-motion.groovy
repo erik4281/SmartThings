@@ -19,49 +19,49 @@
  ************/
 
 definition(
-    name: "Presence by doors and motion",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Change presence based on 1 door and 1 or more motion sensors.",
-    category: "SmartThings Labs",
-    iconUrl: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
-    iconX2Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
-    iconX3Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png")
+	name: "Presence by doors and motion",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Change presence based on 1 door and 1 or more motion sensors.",
+	category: "SmartThings Labs",
+	iconUrl: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
+	iconX2Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png",
+	iconX3Url: "http://icons.iconarchive.com/icons/iconshock/super-vista-general/128/home-icon.png")
 
 /**********
  * Setup  *
  **********/
 
 preferences {
-  	section("Monitor this door..."){
+	section("Monitor this door..."){
 		input "contactSensor", "capability.contactSensor", title: "Contact opens", required: true, multiple: false
 	}
 	section("... and this motion sensor(s)...") {
 		input "motionSensor", "capability.motionSensor", title: "Motion here", required: true, multiple: true
 	}
-    section("...override presence with these sensor(s)") {
-        input "overrideSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
-    }
-    section("Switch to this mode for home...") {
-    	input "homeMode", "mode", title: "Change mode to?", required: true
+	section("...override presence with these sensor(s)") {
+		input "overrideSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
+	}
+	section("Switch to this mode for home...") {
+		input "homeMode", "mode", title: "Change mode to?", required: true
 		input "homeAlarm", "enum", title: "Set SHM mode to?" , required: false, multiple:false, options: ["off","stay","away"]
 		input "homeOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "homeOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
 	}
-    section("Switch to this mode for away...") {
-    	input "awayMode", "mode", title: "Change mode to?", required: true
+	section("Switch to this mode for away...") {
+		input "awayMode", "mode", title: "Change mode to?", required: true
 		input "awayAlarm", "enum", title: "Set SHM mode to?" , required: false, multiple:false, options: ["off","stay","away"]
 		input "awayOn", "capability.switch", title: "Turn on switches?", required: false, multiple: true
 		input "awayOff", "capability.switch", title: "Turn off switches?", required: false, multiple: true
 	}
-    section("Use this delay for away mode...") {
-    	input "delayMinutes", "number", title: "Change after X minutes", required: true
+	section("Use this delay for away mode...") {
+		input "delayMinutes", "number", title: "Change after X minutes", required: true
 	}
-    section("Also monitor for sleepmode (to enable away from sleep") {
-        input "sleepMode", "mode", title: "Monitor sleep-mode", required: false, multiple: true
-    }
-    section("Send PUSH...") {
-    	input "pushOn", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: true
+	section("Also monitor for sleepmode (to enable away from sleep") {
+		input "sleepMode", "mode", title: "Monitor sleep-mode", required: false, multiple: true
+	}
+	section("Send PUSH...") {
+		input "pushOn", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: true
 	}
 }
 
@@ -71,7 +71,7 @@ preferences {
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-    initialize()
+	initialize()
 }
 
 def updated() {
@@ -82,9 +82,9 @@ def updated() {
 
 def initialize() {
 	subscribe(motionSensor, "motion.active", motionActiveHandler)
-    subscribe(motionSensor, "motion.inactive", motionInactiveHandler)
-    subscribe(contactSensor, "contact.open", contactOpenHandler)
-    subscribe(contactSensor, "contact.closed", contactCloseHandler)
+	subscribe(motionSensor, "motion.inactive", motionInactiveHandler)
+	subscribe(contactSensor, "contact.open", contactOpenHandler)
+	subscribe(contactSensor, "contact.closed", contactCloseHandler)
 }
 
 /******************
@@ -93,40 +93,40 @@ def initialize() {
 
 def motionActiveHandler(evt) {
 	log.debug "motionActiveHandler"
-    state.motionState = "active"
-    log.info state.motionState
-    if (overrideSensor) {
+	state.motionState = "active"
+	log.info state.motionState
+	if (overrideSensor) {
 		def current = overrideSensor.currentValue('motion')
 		def overrideValue = overrideSensor.find{it.currentMotion == "active"}
-        if (overrideValue) {
+		if (overrideValue) {
 			changeHome()
 		}
 	}
 }
 
 def motionInactiveHandler(evt) {
-    log.debug "motionInactiveHandler"
-    if (motionOk) {
-        state.motionState = "active"
-    }
-    else { 
-        state.motionState = "inactive"
-    }
-    log.info state.motionState
+	log.debug "motionInactiveHandler"
+	if (motionOk) {
+		state.motionState = "active"
+	}
+	else { 
+		state.motionState = "inactive"
+	}
+	log.info state.motionState
 }
 
 def contactOpenHandler(evt) {
-    log.debug "contactOpenHandler"
-    state.contactState = "open"
+	log.debug "contactOpenHandler"
+	state.contactState = "open"
 	log.info state.contactState
-    changeHome()
+	changeHome()
 }
 
 def contactCloseHandler(evt) {
 	log.debug "contactCloseHandler"
-    state.contactState = "closed"
-    log.info state.contactState
-    log.info "Changing to away in ${delayMinutes} minutes"
+	state.contactState = "closed"
+	log.info state.contactState
+	log.info "Changing to away in ${delayMinutes} minutes"
 	runIn((delayMinutes*60), changeAway, [overwrite: true])
 }
 
@@ -136,59 +136,59 @@ def contactCloseHandler(evt) {
 
 def changeHome() {
 	log.debug "Change home mode"
-    if (awayModeOk) {
-    	log.debug "Changing to home"
-        state.awayState = "home"
-        changeMode(homeMode)
-        if (homeAlarm) {
-        	sendLocationEvent(name: "alarmSystemStatus", value: homeAlarm)
-        }
-        if (pushOn == "Yes") {
-        	sendPush("Arrive: Alarm switched off.")
-        }
-        else {
-        	sendNotificationEvent("Arrive: Alarm switched off.")
-        }
+	if (awayModeOk) {
+		log.debug "Changing to home"
+		state.awayState = "home"
+		changeMode(homeMode)
+		if (homeAlarm) {
+			sendLocationEvent(name: "alarmSystemStatus", value: homeAlarm)
+		}
+		if (pushOn == "Yes") {
+			sendPush("Arrive: Alarm switched off.")
+		}
+		else {
+			sendNotificationEvent("Arrive: Alarm switched off.")
+		}
 		if (homeOn) {	
 			homeOn.each {light ->
 				light.on()
-                light.on()
-            }
+				light.on()
+			}
 		}
 		if (homeOff) {
 			homeOff.each {light ->
 				light.off()
-                light.off()
+				light.off()
 			}
 		}
-    }
+	}
 }
 
 def changeAway() {
 	log.debug "Change away mode"
 	if (state.contactState == "closed" && state.motionState == "inactive" && (homeModeOk || sleepModeOk)) {
 		log.debug "Changing to away"
-        state.awayState = "away"
-        changeMode(awayMode)
-        if (awayAlarm) {
-        	sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
-        }
-        if (pushOn == "Yes") {
-        	sendPush("Leave: Alarm switched on.")
-        }
-        else {
-        	sendNotificationEvent("Leave: Alarm switched on.")
-        }
+		state.awayState = "away"
+		changeMode(awayMode)
+		if (awayAlarm) {
+			sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
+		}
+		if (pushOn == "Yes") {
+			sendPush("Leave: Alarm switched on.")
+		}
+		else {
+			sendNotificationEvent("Leave: Alarm switched on.")
+		}
 		if (awayOn) {	
 			awayOn.each {light ->
 				light.on()
-                light.on()
-            }
+				light.on()
+			}
 		}
 		if (awayOff) {
 			awayOff.each {light ->
 				light.off()
-                light.off()
+				light.off()
 			}
 		}
 	}
@@ -225,9 +225,9 @@ private getHomeModeOk() {
 }
 
 private getSleepModeOk() {
-   def result = sleepMode.containt(location.mode)
-   log.trace "SleepModeOk = $result"
-   result
+	def result = sleepMode.containt(location.mode)
+	log.trace "SleepModeOk = $result"
+	result
 }
 
 private getMotionOk() {
@@ -235,7 +235,7 @@ private getMotionOk() {
 	if (motionSensor) {
 		def current = motionSensor.currentValue('motion')
 		def motionValue = motionSensor.find{it.currentMotion == "active"}
-        if (motionValue) {
+		if (motionValue) {
 			result = true
 		}
 		else {
