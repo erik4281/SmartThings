@@ -94,9 +94,9 @@ def initialize() {
 def motionActiveHandler(evt) {
 	log.debug "motionActiveHandler"
 	state.motionState = "active"
-    state.motionStop = null
+	state.motionStop = null
 	log.info state.motionState
-    log.info state.motionStop
+	log.info state.motionStop
 	if (overrideSensor) {
 		def current = overrideSensor.currentValue('motion')
 		def overrideValue = overrideSensor.find{it.currentMotion == "active"}
@@ -110,14 +110,14 @@ def motionInactiveHandler(evt) {
 	log.debug "motionInactiveHandler"
 	if (motionOk) {
 		state.motionState = "active"
-        state.motionStop = null
+		state.motionStop = null
 	}
 	else { 
 		state.motionState = "inactive"
-        state.motionStop = now()
+		state.motionStop = now()
 	}
 	log.info state.motionState
-    log.info state.motionStop
+	log.info state.motionStop
 }
 
 def contactOpenHandler(evt) {
@@ -173,34 +173,33 @@ def changeAway() {
 	log.debug "Change away mode"
 	if (state.contactState == "closed" && state.motionState == "inactive" && (homeModeOk || sleepModeOk)) {
 		def elapsed = now() - state.motionStop
-        log.info elapsed
+		log.info elapsed
 		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 60000) {
-		
-        log.debug "Changing to away"
-		state.awayState = "away"
-		changeMode(awayMode)
-		if (awayAlarm) {
-			sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
-		}
-		if (pushOn == "Yes") {
-			sendPush("Leave: Alarm switched on.")
-		}
-		else {
-			sendNotificationEvent("Leave: Alarm switched on.")
-		}
-		if (awayOn) {	
-			awayOn.each {light ->
-				light.on()
-				light.on()
+			log.debug "Changing to away"
+			state.awayState = "away"
+			changeMode(awayMode)
+			if (awayAlarm) {
+				sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
+			}
+			if (pushOn == "Yes") {
+				sendPush("Leave: Alarm switched on.")
+			}
+			else {
+				sendNotificationEvent("Leave: Alarm switched on.")
+			}
+			if (awayOn) {	
+				awayOn.each {light ->
+					light.on()
+					light.on()
+				}
+			}
+			if (awayOff) {
+				awayOff.each {light ->
+					light.off()
+					light.off()
+				}
 			}
 		}
-		if (awayOff) {
-			awayOff.each {light ->
-				light.off()
-				light.off()
-			}
-		}
-        }
 	}
 }
 
