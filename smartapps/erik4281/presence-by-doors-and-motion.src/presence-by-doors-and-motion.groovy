@@ -93,9 +93,7 @@ def initialize() {
 
 def motionActiveHandler(evt) {
 	log.debug "motionActiveHandler"
-	state.motionState = "active"
 	state.motionStop = null
-	log.info state.motionState
 	log.info state.motionStop
 	if (overrideSensor) {
 		def current = overrideSensor.currentValue('motion')
@@ -109,28 +107,25 @@ def motionActiveHandler(evt) {
 def motionInactiveHandler(evt) {
 	log.debug "motionInactiveHandler"
 	if (motionOk) {
-		state.motionState = "active"
 		state.motionStop = null
 	}
 	else { 
-		state.motionState = "inactive"
 		state.motionStop = now()
 	}
-	log.info state.motionState
 	log.info state.motionStop
 }
 
 def contactOpenHandler(evt) {
 	log.debug "contactOpenHandler"
-	state.contactState = "open"
-	log.info state.contactState
+	state.contactClose = null
+	log.info state.contactClose
 	changeHome()
 }
 
 def contactCloseHandler(evt) {
 	log.debug "contactCloseHandler"
-	state.contactState = "closed"
-	log.info state.contactState
+	state.contactClose = now()
+	log.info state.contactClose
 	log.info "Changing to away in ${delayMinutes} minutes"
 	runIn((delayMinutes*60), changeAway, [overwrite: true])
 }
@@ -143,7 +138,6 @@ def changeHome() {
 	log.debug "Change home mode"
 	if (awayModeOk) {
 		log.debug "Changing to home"
-		state.awayState = "home"
 		changeMode(homeMode)
 		if (homeAlarm) {
 			sendLocationEvent(name: "alarmSystemStatus", value: homeAlarm)
@@ -171,12 +165,11 @@ def changeHome() {
 
 def changeAway() {
 	log.debug "Change away mode"
-	if (state.contactState == "closed" && state.motionState == "inactive" && (homeModeOk || sleepModeOk)) {
+	if (state.contactClose && state.motionStop && (homeModeOk || sleepModeOk)) {
 		def elapsed = now() - state.motionStop
 		log.info elapsed
 		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 60000) {
 			log.debug "Changing to away"
-			state.awayState = "away"
 			changeMode(awayMode)
 			if (awayAlarm) {
 				sendLocationEvent(name: "alarmSystemStatus", value: awayAlarm)
