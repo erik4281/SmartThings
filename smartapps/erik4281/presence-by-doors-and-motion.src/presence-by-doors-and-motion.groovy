@@ -94,7 +94,9 @@ def initialize() {
 def motionActiveHandler(evt) {
 	log.debug "motionActiveHandler"
 	state.motionState = "active"
+    state.motionStop = null
 	log.info state.motionState
+    log.info state.motionStop
 	if (overrideSensor) {
 		def current = overrideSensor.currentValue('motion')
 		def overrideValue = overrideSensor.find{it.currentMotion == "active"}
@@ -108,11 +110,14 @@ def motionInactiveHandler(evt) {
 	log.debug "motionInactiveHandler"
 	if (motionOk) {
 		state.motionState = "active"
+        state.motionStop = null
 	}
 	else { 
 		state.motionState = "inactive"
+        state.motionStop = now()
 	}
 	log.info state.motionState
+    log.info state.motionStop
 }
 
 def contactOpenHandler(evt) {
@@ -167,7 +172,11 @@ def changeHome() {
 def changeAway() {
 	log.debug "Change away mode"
 	if (state.contactState == "closed" && state.motionState == "inactive" && (homeModeOk || sleepModeOk)) {
-		log.debug "Changing to away"
+		def elapsed = now() - state.motionStop
+        log.info elapsed
+		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 60000) {
+		
+        log.debug "Changing to away"
 		state.awayState = "away"
 		changeMode(awayMode)
 		if (awayAlarm) {
@@ -191,6 +200,7 @@ def changeAway() {
 				light.off()
 			}
 		}
+        }
 	}
 }
 
