@@ -211,7 +211,8 @@ def eventHandler(evt) {
 	state.eventStopTime = null
 	if (modeOk && daysOk && timeOk) {
 		if (darkOk && moodOk) {
-			activateHue()
+			log.info "All checks OK, switching on now"
+            activateHue()
 		}
 	}
 }
@@ -220,31 +221,39 @@ def eventOffHandler(evt) {
 	log.trace "eventHandler: $evt.name: $evt.value"
 	state.eventStopTime = now()
 	if (evt.name == "switch" && evt.value == "off" && moodOk) {
-		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+		log.info "Switch was set to off. Starting timer to switch off."
+        runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 	}
 	else if (switchOff && modeOk && daysOk && timeOk && moodOk) {
-		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
-			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+		log.info "Switches are off and all checks passed"
+        if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+			log.info "Now starting short timer to switch off"
+            runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 		}
 		else if (delayMinutes) {
-			runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+			log.info "Now starting normal timer to switch off"
+            runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
 		}
 		else  {
-			turnOffAfterDelay()
+			log.info "Now starting to switch off"
+            turnOffAfterDelay()
 		}
 	}
 	else if (switchOff && moodOk) {
-		runIn(30*60, turnOffAfterDelay, [overwrite: false])
+		log.info "Now starting 30 minute timer for backup off switching"
+        runIn(30*60, turnOffAfterDelay, [overwrite: false])
 	}
 }
 
 def illuminanceHandler(evt) {
 	if (modeOk && daysOk && timeOk && moodOk) {
 		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
-			deactivateHue()
+			log.info "Light was not off and brightness was too high"
+            deactivateHue()
 		}
 		else if (state.eventStopTime) {
 			if (state.lastStatus != "off" && switchOff) {
+				log.info "Light was not off and not currently activated"
 				def elapsed = now() - state.eventStopTime                
 				if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 					if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
@@ -257,12 +266,14 @@ def illuminanceHandler(evt) {
 					}
 				}
 			}
-				else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
-				activateHue()
+			else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
+				log.info "Light was not on and brightness was too low"
+                activateHue()
 			}
 		}
 		else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
-			activateHue()
+			log.info "Light was not on and brightness was too low"
+            activateHue()
 		}
 	}
 }
@@ -296,6 +307,7 @@ def turnOffAfterDelay() {
 	if (state.eventStopTime && state.lastStatus != "off") {
 		def elapsed = now() - state.eventStopTime
 		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+			log.info "Deactivating started"
 			deactivateHue()
 		}
 	}
@@ -305,6 +317,7 @@ def turnOffAfterDelayShort() {
 	if (state.eventStopTime && state.lastStatus != "off") {
 		def elapsed = now() - state.eventStopTime
 		if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+			log.info "Deactivating started"
 			deactivateHue()
 		}
 	}
@@ -402,6 +415,7 @@ private activateHue() {
 
 private deactivateHue() {
 	state.lastStatus = "off"
+    log.info "Deactivating Hue now (3x)"
 	lights.each {light ->
 		light.off()
 		pause(25)
