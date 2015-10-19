@@ -48,13 +48,9 @@ def switchPage() {
 			input "motionSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
 			input "contactSensor", "capability.contactSensor", title: "Contact opens", required: false, multiple: true
 			input "inputSwitch", "capability.switch", title: "Switch turns on", required: false, multiple: true
-			//input "triggerModes", "mode", title: "System changes mode", required: false, multiple: true
-			//input "timeOfDay", "time", title: "At a scheduled time", required: false
 		}
 		section("Switch off when..."){
 			input "delayMinutes", "number", title: "Off after x minutes of motion/contact", required: false
-			//input "triggerModesOff", "mode", title: "System changes mode", required: false, multiple: true
-			//input "timeOfDayOff", "time", title: "At a scheduled time", required: false
 		}
 		section("Or switch off faster") {
 			input "shortDelayMinutes", "number", title: "Off after x minutes", required: false
@@ -170,18 +166,6 @@ def initialize() {
 	if (lightSensor) {
 		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])
 	}
-	//if (triggerModes || triggerModesOff) {
-	//	subscribe(location, modeChangeHandler)
-	//}
-	//if (timeOfDay) {
-	//	schedule(timeOfDay, scheduledTimeHandler)
-	//}
-	//if (timeOfDayOff) {
-	//	schedule(timeOfDayOff, scheduledTimeOffHandler)
-	//}
-    //if (sceneName1 && (starting_1 || days_1 || modes_1 || switchOn_1 || switchOff_1)) {
-    //    schedule(scene_1, timingChecker)
-	//}
 }
 
 /******************
@@ -213,10 +197,8 @@ def eventHandler(evt) {
 	log.trace "eventHandler: $evt.name: $evt.value"
 	state.eventStopTime = null
 	if (modeOk && daysOk && timeOk && darkOk && moodOk) {
-		//if (darkOk && moodOk) {
 		log.info "All checks OK, switching on now"
 		activateHue()
-		//}
 	}
 }
 
@@ -280,27 +262,6 @@ def illuminanceHandler(evt) {
 		}
 	}
 }
-
-//def modeChangeHandler(evt) {
-//	if (evt.value in triggerModes) {
-//		pause(2000)
-//		activateHue()
-//	}
-//	if (evt.value in triggerModesOff) {
-//		pause(2000)
-//		deactivateHue()
-//	}
-//}
-
-//def scheduledTimeHandler() {
-//	pause(2000)
-//	activateHue()
-//}
-
-//def scheduledTimeOffHandler() {
-//	pause(2000)
-//	deactivateHue()
-//}
 
 /********************
  * Actuator methods *
@@ -434,97 +395,49 @@ private deactivateHue() {
 
 private getTiming() {
 	def sceneId = params.sceneId as Integer ?: state.sceneId
-	log.info "sceneId = ${sceneId}"
-	state.modeChecker = modes_1
-	state.dayChecker = days_1
-	state.startingChecker = starting_1
-	state.endingChecker = ending_1
-	state.switchOnChecker = switchOn_1
-	state.switchOffChecker = switchOff_1
-	log.debug "checking scene 1"
-	if (sceneName1 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	log.info "Before sceneId = ${sceneId}"
+    log.info "START"
+    sceneId = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    sceneId.each {
+		log.debug it
+    //    log.debug sceneName${it}
+	}
+    log.info "END"
+	if (sceneName1 && modeOkScene_1 && daysOkScene_1 && timeOkScene_1 && switchOnScene_1 && switchOffScene_1) {
 		state.selectedSceneId = 1
 		log.info sceneName1
 	}
-	state.modeChecker = modes_2
-	state.dayChecker = days_2
-	state.startingChecker = starting_2
-	state.endingChecker = ending_2
-	state.switchOnChecker = switchOn_2
-	state.switchOffChecker = switchOff_2
-	log.debug "checking scene 2"
-	if (sceneName2 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName2 && modeOkScene_2 && daysOkScene_2 && timeOkScene_2 && switchOnScene_2 && switchOffScene_2) {
 		state.selectedSceneId = 2
-		log.info sceneName2
+		log.info sceneName1
 	}
-	state.modeChecker = modes_3
-	state.dayChecker = days_3
-	state.startingChecker = starting_3
-	state.endingChecker = ending_3
-	state.switchOnChecker = switchOn_3
-	state.switchOffChecker = switchOff_3
-	log.debug "checking scene 3"
-	if (sceneName3 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName3 && modeOkScene_3 && daysOkScene_3 && timeOkScene_3 && switchOnScene_3 && switchOffScene_3) {
 		state.selectedSceneId = 3
-		log.info sceneName3
+		log.info sceneName1
 	}
-	state.modeChecker = modes_4
-	state.dayChecker = days_4
-	state.startingChecker = starting_4
-	state.endingChecker = ending_4
-	state.switchOnChecker = switchOn_4
-	state.switchOffChecker = switchOff_4
-	log.debug "checking scene 4"
-	if (sceneName4 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName4 && modeOkScene_4 && daysOkScene_4 && timeOkScene_4 && switchOnScene_4 && switchOffScene_4) {
 		state.selectedSceneId = 4
-		log.info sceneName4
+		log.info sceneName1
 	}
-	state.modeChecker = modes_5
-	state.dayChecker = days_5
-	state.startingChecker = starting_5
-	state.endingChecker = ending_5
-	state.switchOnChecker = switchOn_5
-	state.switchOffChecker = switchOff_5
-	log.debug "checking scene 5"
-	if (sceneName5 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName5 && modeOkScene_5 && daysOkScene_5 && timeOkScene_5 && switchOnScene_5 && switchOffScene_5) {
 		state.selectedSceneId = 5
-		log.info sceneName5
+		log.info sceneName1
 	}
-	state.modeChecker = modes_6
-	state.dayChecker = days_6
-	state.startingChecker = starting_6
-	state.endingChecker = ending_6
-	state.switchOnChecker = switchOn_6
-	state.switchOffChecker = switchOff_6
-	log.debug "checking scene 6"
-	if (sceneName6 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName6 && modeOkScene_6 && daysOkScene_6 && timeOkScene_6 && switchOnScene_6 && switchOffScene_6) {
 		state.selectedSceneId = 6
-		log.info sceneName6
+		log.info sceneName1
 	}
-	state.modeChecker = modes_7
-	state.dayChecker = days_7
-	state.startingChecker = starting_7
-	state.endingChecker = ending_7
-	state.switchOnChecker = switchOn_7
-	state.switchOffChecker = switchOff_7
-	log.debug "checking scene 7"
-	if (sceneName7 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName7 && modeOkScene_7 && daysOkScene_7 && timeOkScene_7 && switchOnScene_7 && switchOffScene_7) {
 		state.selectedSceneId = 7
-		log.info sceneName7
+		log.info sceneName1
 	}
-	state.modeChecker = modes_8
-	state.dayChecker = days_8
-	state.startingChecker = starting_8
-	state.endingChecker = ending_8
-	state.switchOnChecker = switchOn_8
-	state.switchOffChecker = switchOff_8
-	log.debug "checking scene 8"
-	if (sceneName8 && modeOkScene && daysOkScene && timeOkScene && switchOnScene && switchOffScene) {
+	else if (sceneName8 && modeOkScene_8 && daysOkScene_8 && timeOkScene_8 && switchOnScene_8 && switchOffScene_8) {
 		state.selectedSceneId = 8
-		log.info sceneName8
+		log.info sceneName1
 	}
 	sceneId = state.selectedSceneId
 	state.sceneId = sceneId
+	log.info "After sceneId = ${sceneId}"
 }
 
 private closestLevel(level) {
@@ -680,17 +593,88 @@ private getTimeOk() {
 	result
 }
 
-private getModeOkScene() {
-	def modes = state.modeChecker
-	def result = !modes || modes.contains(location.mode)
-	log.trace "modeOkScene = $result"
+////////////////////////////////////
+////////////////////////////////////
+
+//private getModeOkScene() {
+//	def modes = state.modeChecker
+//	def result = !modes || modes.contains(location.mode)
+//	log.trace "modeOkScene = $result"
+//	result
+//}
+
+private getModeOkScene_1() {
+	def result = !modes_1 || modes_1.contains(location.mode)
+	log.trace "modeOkScene_1 = $result"
 	result
 }
 
-private getDaysOkScene() {
-	def days = state.dayChecker
+private getModeOkScene_2() {
+	def result = !modes_2 || modes_2.contains(location.mode)
+	log.trace "modeOkScene_2 = $result"
+	result
+}
+
+private getModeOkScene_3() {
+	def result = !modes_3 || modes_3.contains(location.mode)
+	log.trace "modeOkScene_3 = $result"
+	result
+}
+
+private getModeOkScene_4() {
+	def result = !modes_4 || modes_4.contains(location.mode)
+	log.trace "modeOkScene_4 = $result"
+	result
+}
+
+private getModeOkScene_5() {
+	def result = !modes_5 || modes_5.contains(location.mode)
+	log.trace "modeOkScene_5 = $result"
+	result
+}
+
+private getModeOkScene_6() {
+	def result = !modes_6 || modes_6.contains(location.mode)
+	log.trace "modeOkScene_6 = $result"
+	result
+}
+
+private getModeOkScene_7() {
+	def result = !modes_7 || modes_7.contains(location.mode)
+	log.trace "modeOkScene_7 = $result"
+	result
+}
+
+private getModeOkScene_8() {
+	def result = !modes_8 || modes_8.contains(location.mode)
+	log.trace "modeOkScene_8 = $result"
+	result
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+//private getDaysOkScene() {
+//	def days = state.dayChecker
+//	def result = true
+//	if (days) {
+//		def df = new java.text.SimpleDateFormat("EEEE")
+//		if (location.timeZone) {
+//			df.setTimeZone(location.timeZone)
+//		}
+//		else {
+//			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+//		}
+//		def day = df.format(new Date())
+//		result = days.contains(day)
+//	}
+//	log.trace "daysOkScene = $result"
+//	result
+//}
+
+private getDaysOkScene_1() {
 	def result = true
-	if (days) {
+	if (days_1) {
 		def df = new java.text.SimpleDateFormat("EEEE")
 		if (location.timeZone) {
 			df.setTimeZone(location.timeZone)
@@ -699,32 +683,272 @@ private getDaysOkScene() {
 			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
 		}
 		def day = df.format(new Date())
-		result = days.contains(day)
+		result = days_1.contains(day)
 	}
-	log.trace "daysOkScene = $result"
+	log.trace "daysOkScene_1 = $result"
 	result
 }
 
-private getTimeOkScene() {
-	def starting = state.startingChecker
-	def ending = state.endingChecker
+private getDaysOkScene_2() {
 	def result = true
-	if (starting && ending) {
+	if (days_2) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_2.contains(day)
+	}
+	log.trace "daysOkScene_2 = $result"
+	result
+}
+
+private getDaysOkScene_3() {
+	def result = true
+	if (days_3) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_3.contains(day)
+	}
+	log.trace "daysOkScene_3 = $result"
+	result
+}
+
+private getDaysOkScene_4() {
+	def result = true
+	if (days_4) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_4.contains(day)
+	}
+	log.trace "daysOkScene_4 = $result"
+	result
+}
+
+private getDaysOkScene_5() {
+	def result = true
+	if (days_5) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_5.contains(day)
+	}
+	log.trace "daysOkScene_5 = $result"
+	result
+}
+
+private getDaysOkScene_6() {
+	def result = true
+	if (days_6) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_6.contains(day)
+	}
+	log.trace "daysOkScene_6 = $result"
+	result
+}
+
+private getDaysOkScene_7() {
+	def result = true
+	if (days_7) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_7.contains(day)
+	}
+	log.trace "daysOkScene_7 = $result"
+	result
+}
+
+private getDaysOkScene_8() {
+	def result = true
+	if (days_8) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = days_8.contains(day)
+	}
+	log.trace "daysOkScene_8 = $result"
+	result
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+//private getTimeOkScene() {
+//	def starting = state.startingChecker
+//	def ending = state.endingChecker
+//	def result = true
+//	if (starting && ending) {
+//		def currTime = now()
+//		def start = timeToday(starting, location?.timeZone).time
+//		def stop = timeToday(ending, location?.timeZone).time
+//		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+//	}
+//	log.trace "timeOkScene = $result"
+//	result
+//}
+
+private getTimeOkScene_1() {
+	def result = true
+	if (starting_1 && ending_1) {
 		def currTime = now()
-		def start = timeToday(starting, location?.timeZone).time
-		def stop = timeToday(ending, location?.timeZone).time
+		def start = timeToday(starting_1, location?.timeZone).time
+		def stop = timeToday(ending_1, location?.timeZone).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
-	log.trace "timeOkScene = $result"
+	log.trace "timeOkScene_1 = $result"
 	result
 }
 
-private getSwitchOnScene() {
-    def switchOn = state.switchOnChecker
+private getTimeOkScene_2() {
 	def result = true
-	if (switchOn) {
-		def current = switchOn.currentValue('switch')
-		def switchOnValue = switchOn.find{it.currentSwitch == "on"}
+	if (starting_2 && ending_2) {
+		def currTime = now()
+		def start = timeToday(starting_2, location?.timeZone).time
+		def stop = timeToday(ending_2, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_2 = $result"
+	result
+}
+
+private getTimeOkScene_3() {
+	def result = true
+	if (starting_3 && ending_3) {
+		def currTime = now()
+		def start = timeToday(starting_3, location?.timeZone).time
+		def stop = timeToday(ending_3, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_3 = $result"
+	result
+}
+
+private getTimeOkScene_4() {
+	def result = true
+	if (starting_4 && ending_4) {
+		def currTime = now()
+		def start = timeToday(starting_4, location?.timeZone).time
+		def stop = timeToday(ending_4, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_4 = $result"
+	result
+}
+
+private getTimeOkScene_5() {
+	def result = true
+	if (starting_5 && ending_5) {
+		def currTime = now()
+		def start = timeToday(starting_5, location?.timeZone).time
+		def stop = timeToday(ending_5, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_5 = $result"
+	result
+}
+
+private getTimeOkScene_6() {
+	def result = true
+	if (starting_6 && ending_6) {
+		def currTime = now()
+		def start = timeToday(starting_6, location?.timeZone).time
+		def stop = timeToday(ending_6, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_6 = $result"
+	result
+}
+
+private getTimeOkScene_7() {
+	def result = true
+	if (starting_7 && ending_7) {
+		def currTime = now()
+		def start = timeToday(starting_7, location?.timeZone).time
+		def stop = timeToday(ending_7, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_7 = $result"
+	result
+}
+
+private getTimeOkScene_8() {
+	def result = true
+	if (starting_8 && ending_8) {
+		def currTime = now()
+		def start = timeToday(starting_8, location?.timeZone).time
+		def stop = timeToday(ending_8, location?.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOkScene_8 = $result"
+	result
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+//private getSwitchOnScene() {
+//    def switchOn = state.switchOnChecker
+//	def result = true
+//	if (switchOn) {
+//		def current = switchOn.currentValue('switch')
+//		def switchOnValue = switchOn.find{it.currentSwitch == "on"}
+//		if (switchOnValue) {
+//			result = true
+//		}
+//		else {
+//			result = false
+//		}
+//	}
+//	else {
+//		result = true
+//	}
+//	log.trace "switchOnScene = $result"
+//	result
+//}
+
+private getSwitchOnScene_1() {
+	def result = true
+	if (switchOn_1) {
+		def current = switchOn_1.currentValue('switch')
+		def switchOnValue = switchOn_1.find{it.currentSwitch == "on"}
 		if (switchOnValue) {
 			result = true
 		}
@@ -735,16 +959,171 @@ private getSwitchOnScene() {
 	else {
 		result = true
 	}
-	log.trace "switchOnScene = $result"
+	log.trace "switchOnScene_1 = $result"
 	result
 }
 
-private getSwitchOffScene() {
-	def switchOff = state.switchOffChecker
+private getSwitchOnScene_2() {
 	def result = true
-	if (switchOff) {
-		def current = switchOff.currentValue('switch')
-		def switchOffValue = switchOff.find{it.currentSwitch == "on"}
+	if (switchOn_2) {
+		def current = switchOn_2.currentValue('switch')
+		def switchOnValue = switchOn_2.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_2 = $result"
+	result
+}
+
+private getSwitchOnScene_3() {
+	def result = true
+	if (switchOn_3) {
+		def current = switchOn_3.currentValue('switch')
+		def switchOnValue = switchOn_3.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_3 = $result"
+	result
+}
+
+private getSwitchOnScene_4() {
+	def result = true
+	if (switchOn_4) {
+		def current = switchOn_4.currentValue('switch')
+		def switchOnValue = switchOn_4.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_4 = $result"
+	result
+}
+
+private getSwitchOnScene_5() {
+	def result = true
+	if (switchOn_5) {
+		def current = switchOn_5.currentValue('switch')
+		def switchOnValue = switchOn_5.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_5 = $result"
+	result
+}
+
+private getSwitchOnScene_6() {
+	def result = true
+	if (switchOn_6) {
+		def current = switchOn_6.currentValue('switch')
+		def switchOnValue = switchOn_6.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_6 = $result"
+	result
+}
+
+private getSwitchOnScene_7() {
+	def result = true
+	if (switchOn_7) {
+		def current = switchOn_7.currentValue('switch')
+		def switchOnValue = switchOn_7.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_7 = $result"
+	result
+}
+
+private getSwitchOnScene_8() {
+	def result = true
+	if (switchOn_8) {
+		def current = switchOn_8.currentValue('switch')
+		def switchOnValue = switchOn_8.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene_8 = $result"
+	result
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+//private getSwitchOffScene() {
+//	def switchOff = state.switchOffChecker
+//	def result = true
+//	if (switchOff) {
+//		def current = switchOff.currentValue('switch')
+//		def switchOffValue = switchOff.find{it.currentSwitch == "on"}
+//		if (switchOffValue) {
+//			result = false
+//		}
+//		else {
+//			result = true
+//		}
+//	}
+//	else {
+//		result = true
+//	}
+//	log.trace "switchOffScene = $result"
+//	result
+//}
+
+private getSwitchOffScene_1() {
+	def result = true
+	if (switchOff_1) {
+		def current = switchOff_1.currentValue('switch')
+		def switchOffValue = switchOff_1.find{it.currentSwitch == "on"}
 		if (switchOffValue) {
 			result = false
 		}
@@ -755,6 +1134,139 @@ private getSwitchOffScene() {
 	else {
 		result = true
 	}
-	log.trace "switchOffScene = $result"
+	log.trace "switchOffScene_1 = $result"
+	result
+}
+
+private getSwitchOffScene_2() {
+	def result = true
+	if (switchOff_2) {
+		def current = switchOff_2.currentValue('switch')
+		def switchOffValue = switchOff_2.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_2 = $result"
+	result
+}
+
+private getSwitchOffScene_3() {
+	def result = true
+	if (switchOff_3) {
+		def current = switchOff_3.currentValue('switch')
+		def switchOffValue = switchOff_3.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_3 = $result"
+	result
+}
+
+private getSwitchOffScene_4() {
+	def result = true
+	if (switchOff_4) {
+		def current = switchOff_4.currentValue('switch')
+		def switchOffValue = switchOff_4.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_4 = $result"
+	result
+}
+
+private getSwitchOffScene_5() {
+	def result = true
+	if (switchOff_5) {
+		def current = switchOff_5.currentValue('switch')
+		def switchOffValue = switchOff_5.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_5 = $result"
+	result
+}
+
+private getSwitchOffScene_6() {
+	def result = true
+	if (switchOff_6) {
+		def current = switchOff_6.currentValue('switch')
+		def switchOffValue = switchOff_6.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_6 = $result"
+	result
+}
+
+private getSwitchOffScene_7() {
+	def result = true
+	if (switchOff_7) {
+		def current = switchOff_7.currentValue('switch')
+		def switchOffValue = switchOff_7.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_7 = $result"
+	result
+}
+
+private getSwitchOffScene_8() {
+	def result = true
+	if (switchOff_8) {
+		def current = switchOff_8.currentValue('switch')
+		def switchOffValue = switchOff_8.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene_8 = $result"
 	result
 }
