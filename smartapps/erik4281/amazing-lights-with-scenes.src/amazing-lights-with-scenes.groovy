@@ -179,6 +179,9 @@ def initialize() {
 	//if (timeOfDayOff) {
 	//	schedule(timeOfDayOff, scheduledTimeOffHandler)
 	//}
+    //if (sceneName1 && (starting_1 || days_1 || modes_1 || switchOn_1 || switchOff_1)) {
+    //    schedule(scene_1, timingChecker)
+	//}
 }
 
 /******************
