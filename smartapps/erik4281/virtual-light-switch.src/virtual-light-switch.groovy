@@ -33,25 +33,19 @@ definition(
  **********/
 
 preferences {
-    page(name: "switchPage", title: "Switch on lights when this happens:", nextPage: "optionsPage", uninstall: true) 
-    page(name: "optionsPage", title: "Use these options:", install: true, uninstall: true) 
+    page(name: "switchPage", title: "Switch on lights when this happens:", install: true, uninstall: true) 
 }
 
 def switchPage() {
 	dynamicPage(name: "switchPage") {
+        section("Control these switches") {
+            input "switching", "capability.switch", title: "Which switches?", required:true, multiple:true
+        }
         section("Monitor sensors..."){
             input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
             input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
 			input "inputSwitch", "capability.switch", title: "Switches (using short-delay time)", required: false, multiple: true
             input "delayMinutes", "number", title: "Off after x minutes", required: false
-        }
-        section("Switch ON..."){
-            input "triggerModes", "mode", title: "System Changes Mode", required: false, multiple: true
-            input "timeOfDay", "time", title: "At a Scheduled Time", required: false
-        }
-        section("Switch OFF..."){
-            input "triggerModesOff", "mode", title: "System Changes Mode", required: false, multiple: true
-            input "timeOfDayOff", "time", title: "At a Scheduled Time", required: false
         }
 		section("Monitor illuminance sensor") {
 			input "lightSensor", "capability.illuminanceMeasurement", title: "Sensor(s)?", required: false
@@ -64,22 +58,8 @@ def switchPage() {
 			input "shortEnding", "time", title: "And ending at", required: false
 			input "shortDelayMinutes", "number", title: "Off after x minutes", required: false
 		}
-	}
-}
-
-def optionsPage() {
-	dynamicPage(name: "optionsPage") {
-        section("Control these switches") {
-            input "switching", "capability.switch", title: "Which switches?", required:true, multiple:true
-        }
-		section("Timing options") {
-			input "starting", "time", title: "Starting from", required: false
-			input "ending", "time", title: "Ending at", required: false
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
-		}
 		section([mobileOnly:true]) {
+			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 			label title: "Assign a name", required: false
 		}
 	}
@@ -103,20 +83,14 @@ def updated() {
 
 def subscribeToEvents() {
 	subscribe(app, appTouchHandler)
-	subscribe(motionSensor, "motion", motionHandler)
-	subscribe(contactSensor, "contact", contactHandler)
-	subscribe(inputSwitch, "switch", switchHandler)
+	subscribe(motionSensor, "motion.active", eventHandler)
+	subscribe(contactSensor, "contact.open", eventHandler)
+	subscribe(inputSwitch, "switch.on", eventHandler)
+	subscribe(motionSensor, "motion.inactive", eventOffHandler)
+	subscribe(contactSensor, "contact.closed", eventOffHandler)
+	subscribe(inputSwitch, "switch.off", eventOffHandler)
 	if (lightSensor) {
 		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])
-	}
-	if (triggerModes || triggerModesOff) {
-		subscribe(location, modeChangeHandler)
-	}
-	if (timeOfDay) {
-		schedule(timeOfDay, scheduledTimeHandler)
-	}
-	if (timeOfDayOff) {
-		schedule(timeOfDayOff, scheduledTimeOffHandler)
 	}
 }
 
@@ -130,255 +104,116 @@ def appTouchHandler(evt) {
 	def current = motionSensor.currentValue("motion")
 	def motionValue = motionSensor.find{it.currentMotion == "active"}
 	if (motionValue) {
-    	log.debug "motionValue = true"
-		state.motionStopTime = null
+		state.eventStopTime = null
 	}
 	else {
-    	state.motionStopTime = now()
-    }
-    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
-        log.debug "Short delay started"
-        runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-        log.info "Delay short: $shortDelayMinutes minutes"
-    }
-    else if(delayMinutes) {
-        log.debug "Normal delay started"
-        runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
-        log.info "Delay: $delayMinutes minutes"
-	} 
-	else {
-		log.debug "Backup scenario started"
-        turnOffMotionAfterDelay()
+		state.eventStopTime = now()
+	}
+	if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+	}
+	else if (delayMinutes) {
+		runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+	}
+	else  {
+		turnOffAfterDelay()
 	}
 }
 
-def switchHandler(evt) {
-	log.trace "switchHandler()"
-	def current = inputSwitch.currentValue('switch')
-	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && darkOk && allOk) {
-    	log.debug "motionValue = true"
+def eventHandler(evt) {
+	log.trace "eventHandler: $evt.name: $evt.value"
+	state.eventStopTime = null
+	if (modeOk && daysOk && timeOk && darkOk && moodOk) {
+		log.info "All checks OK, switching on now"
 		activateSwitch()
-        state.motionStopTime = null
-	}
-	else if (switchValue) {
-    	log.debug "motionValue = true"
-		state.motionStopTime = null
-	}
-	else {
-    	state.motionStopTime = now()
-    }
-    if(shortDelayMinutes) {
-        log.debug "Short delay started"
-        runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-        log.info "Delay short: $shortDelayMinutes minutes"
-    }
-	else {
-		log.debug "Backup scenario started"
-        turnOffMotionAfterDelay()
 	}
 }
 
-def motionHandler(evt) {
-	log.trace "motionHandler"
-	def current = motionSensor.currentValue("motion")
-	def motionValue = motionSensor.find{it.currentMotion == "active"}
-	if (switchOk && allOk) {
-    	log.debug "allOk"
-        if (motionValue) {
-            log.debug "motionValue = true"
-            state.motionStopTime = null
-            if (darkOk && allOk) {
-	            log.debug "allOk"
-                activateSwitch()
-            }
-        }
-        else {
-            state.motionStopTime = now()
-		    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
-		        log.debug "Short delay started"
-                runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-		        log.info "Delay short (motion): $shortDelayMinutes minutes"
-		    }
-            else if(delayMinutes) {
-                log.debug "Normal delay started"
-                runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
-                log.info "Delay (motion): $delayMinutes minutes"
-            } 
-            else {
-                log.debug "Backup scenario started"
-                turnOffMotionAfterDelay()
-            }
-        }
-    }
-    else if (switchOk) {
-        if (motionValue) {
-            state.motionStopTime = null
-            log.debug "Timer stopped"
-        }
-        else {
-            state.motionStopTime = now()
-            log.debug "Backup scenario started"
-            runIn(30*60, turnOffMotionAfterDelay, [overwrite: false])
-            log.info "Delay (motion): 30 minutes (backup off switch)"
-        }
-    }
-    else {
-        if (motionValue) {
-            state.motionStopTime = null
-            log.debug "Timer stopped"
-        }
-        else {
-            state.motionStopTime = now()
-            log.debug "Backup scenario started"
-        }
-    }
-}
-
-def contactHandler(evt) {
-	log.trace "contactHandler"
-	def current = contactSensor.currentValue("contact")
-	def contactValue = contactSensor.find{it.currentContact == "open"}
-	if (switchOk && allOk) {
-        log.debug "allOk"
-        if (contactValue) {
-            state.motionStopTime = null
-            if (darkOk && allOk) {
-	            log.debug "allOk"
-                activateSwitch()
-            }
-        }
-        else {
-            state.motionStopTime = now()
-		    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
-		        log.debug "Short delay started"
-                runIn(shortDelayMinutes*60, turnOffMotionAfterDelayShort, [overwrite: false])
-		        log.info "Delay short (contact): $shortDelayMinutes minutes"
-		    }
-            else if(delayMinutes) {
-                log.debug "Normal delay started"
-                runIn(delayMinutes*60, turnOffMotionAfterDelay, [overwrite: false])
-                log.info "Delay (contact): $delayMinutes minutes"
-            } 
-            else {
-                log.debug "Backup scenario started"
-                turnOffMotionAfterDelay()
-            }
-        }
-    }
-    else if (switchOk) {
-        if (motionValue) {
-            state.motionStopTime = null
-            log.debug "Timer stopped"
-        }
-        else {
-            state.motionStopTime = now()
-            log.debug "Backup scenario started"
-            runIn(30*60, turnOffMotionAfterDelay, [overwrite: false])
-            log.info "Delay (motion): 30 minutes (backup off switch)"
-        }
-    }
-    else {
-        if (motionValue) {
-            state.motionStopTime = null
-            log.debug "Timer stopped"
-        }
-        else {
-            state.motionStopTime = now()
-            log.debug "Backup scenario started"
-        }
-    }
+def eventOffHandler(evt) {
+	log.trace "eventHandler: $evt.name: $evt.value"
+	state.eventStopTime = now()
+	if (evt.name == "switch" && evt.value == "off" && moodOk) {
+		log.info "Switch was set to off. Starting timer to switch off."
+        runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+	}
+	else if (switchOff && modeOk && daysOk && timeOk && moodOk) {
+		log.info "Switches are off and all checks passed"
+        if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+			log.info "Now starting short timer to switch off"
+            runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+		}
+		else if (delayMinutes) {
+			log.info "Now starting normal timer to switch off"
+            runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+		}
+		else  {
+			log.info "Now starting to switch off"
+            turnOffAfterDelay()
+		}
+	}
+	else if (switchOff && moodOk) {
+		log.info "Now starting 30 minute timer for backup off switching"
+        runIn(30*60, turnOffAfterDelay, [overwrite: false])
+	}
 }
 
 def illuminanceHandler(evt) {
-	log.trace "illuminanceHandler()"
-    if (allOk) {
-    	log.debug "allOk"
-        log.info "state.lastStatus: $state.lastStatus"
-        log.info "evt.integerValue: $evt.integerValue"
-        log.info "state.motionStopTime: $state.motionStopTime"
-        if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
-            log.debug "State is On and brightness is higher than trigger value"
+	if (modeOk && daysOk && timeOk && moodOk) {
+		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
+			log.info "Light was not off and brightness was too high"
             deactivateSwitch()
-        }
-        else if (state.motionStopTime) {
-            log.debug "Timer is running (so no motion at the moment)"
-            if (state.lastStatus != "off" && switchOk) {
-                log.debug "State is on"
-                def elapsed = now() - state.motionStopTime                
-			    if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
- 			       log.debug "Switch off within short delay time"
-                   if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
-			        	deactivateSwitch()
-                    }
-			    }
+		}
+		else if (state.eventStopTime) {
+			if (state.lastStatus != "off" && switchOff) {
+				log.info "Light was not off and not currently activated"
+				def elapsed = now() - state.eventStopTime                
+				if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+					if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+						deactivateSwitch()
+					}
+				}
 				else if(delayMinutes) {
-                	log.debug "Switch off within normal delay time"
-                    if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
-                    	deactivateSwitch()
-                    }
-                }
-            }
-            else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOk != true) {
-            	log.debug "State is off and brightness is lower than trigger value. Timer was already running."
+					if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+						deactivateSwitch()
+					}
+				}
+			}
+			else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
+				log.info "Light was not on and brightness was too low"
                 activateSwitch()
-            }
-        }
-        else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
-            log.debug "State is Off and brightness is lower than trigger value"
+			}
+		}
+		else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
+			log.info "Light was not on and brightness was too low"
             activateSwitch()
-        }
+		}
 	}
-}
-
-def modeChangeHandler(evt) {
-	if (evt.value in triggerModes) {
-		log.debug "Activating switch"
-        activateSwitch()
-	}
-	if (evt.value in triggerModesOff) {
-		log.debug "Deactivating switch"
-        deactivateSwitch()
-	}
-}
-
-def scheduledTimeHandler() {
-	log.trace "scheduledTimeHandler()"
-	log.debug "Activating switch"
-    activateSwitch()
-}
-
-def scheduledTimeOffHandler() {
-	log.trace "scheduledTimeOffHandler()"
-	log.debug "Deactivating switch"
-    deactivateSwitch()
 }
 
 /******************
  * Helper methods *
  ******************/
 
-def turnOffMotionAfterDelay() {
-	log.trace "In turnOffMotionAfterDelay, state.motionStopTime = $state.motionStopTime, state.lastStatus = $state.lastStatus"
-	log.debug "Turning off after (normal) delay"
-    if (state.motionStopTime && state.lastStatus != "off") {
-		def elapsed = now() - state.motionStopTime
-        if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
-        	deactivateSwitch()
+def turnOffAfterDelay() {
+	if (state.eventStopTime && state.lastStatus != "off") {
+		def elapsed = now() - state.eventStopTime
+		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+			log.info "Deactivating started"
+			deactivateSwitch()
 		}
 	}
 }
 
-def turnOffMotionAfterDelayShort() {
-	log.trace "In turnOffMotionAfterDelayShort, state.motionStopTime = $state.motionStopTime, state.lastStatus = $state.lastStatus"
-	log.debug "Turning off after (short) delay"
-    if (state.motionStopTime && state.lastStatus != "off") {
-		def elapsed = now() - state.motionStopTime
-        if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
-        	deactivateSwitch()
+def turnOffAfterDelayShort() {
+	if (state.eventStopTime && state.lastStatus != "off") {
+		def elapsed = now() - state.eventStopTime
+		if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+			log.info "Deactivating started"
+			deactivateSwitch()
 		}
 	}
 }
+
 
 def activateSwitch() {
 	def current = switching.currentValue('switch')
@@ -440,7 +275,6 @@ private getAllOk() {
 private getSwitchOk() {
 	def result = true
 	if (inputSwitch) {
-    	//log.debug "inputswitch present"
     	def current = inputSwitch.currentValue('switch')
 		def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 		if (switchValue) {
@@ -451,7 +285,6 @@ private getSwitchOk() {
         }
     }
     else {
-    	//log.debug "no inputswitch"
     	result = true
     }
     log.trace "switchOk = $result"
@@ -521,17 +354,4 @@ private getTimeOk() {
 	}
 	log.trace "timeOk = $result"
 	result
-}
-
-private hhmm(time, fmt = "h:mm a")
-{
-	def t = timeToday(time, location.timeZone)
-	def f = new java.text.SimpleDateFormat(fmt)
-	f.setTimeZone(location.timeZone ?: timeZone(time))
-	f.format(t)
-}
-
-private timeIntervalLabel()
-{
-	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
 }

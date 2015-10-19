@@ -53,6 +53,10 @@ def lightSelectPage() {
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 		}
         section("Lights will also change to these when the mode changes to the selected modes. This only happens when the input switch is enabled!")
+        section("Only trigger when this switch is ON/OFF") {
+        	input "ifSwitchOn", "capability.switch", title: "Switch", required: false
+            input "ifSwitchOff", "capability.switch", title: "Switch", required: false
+        }
 		section("Use MoodCube switch (disable auto-switching light)") {
 			input "moodSwitch", "capability.switch", title: "Switch", required: false
 		}
@@ -105,13 +109,19 @@ def updated() {
 
 def subscribeToEvents() {
 	subscribe(app, appTouchHandler)
-	subscribe(inputSwitch, "switch", switchHandler)
+	subscribe(inputSwitch, "switch", eventHandler)
 	if (starting) {
-    	schedule(starting, scheduledTimeHandler)
+    	schedule(starting, timerHandler)
     }
     if (modes) {
-		subscribe(location, modeChangeHandler)
+		subscribe(location, timerHandler)
 	}
+    if (ifSwitchOn) {
+    	subscribe(ifSwitchOn, "switch", eventHandler)
+    }
+    if (ifSwitchOff) {
+    	subscribe(ifSwitchOff, "switch", eventHandler)
+    }
 }
 
 /******************
@@ -121,17 +131,13 @@ def subscribeToEvents() {
 def appTouchHandler(evt) {
 	log.info "app started manually"
     activateHue()
-    activateHue()
-    activateHue()
 }
 
-def switchHandler(evt) {
+def eventHandler(evt) {
 	log.trace "switchHandler()"
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && allOk) {
-        activateHue()
-        activateHue()
+	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
         activateHue()
 	}
 	else if (switchValue) {
@@ -142,34 +148,13 @@ def switchHandler(evt) {
 	}
 }
 
-def scheduledTimeHandler() {
+def timerHandler() {
 	log.trace "scheduledTimeHandler()"
 	pause(2000)
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && allOk) {
+	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
     	log.trace "do it!"
-        activateHue()
-        activateHue()
-        activateHue()
-	}
-    else if (switchValue) {
-    	log.info "Wrong mode to activate anything"
-	}
-    else {
-    	log.info "Nothing to do..."
-	}
-}
-
-def modeChangeHandler(evt) {
-	log.trace "modeChangeHandler()"
-	pause(2000)
-    def current = inputSwitch.currentValue('switch')
-	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && allOk) {
-    	log.trace "do it!"
-        activateHue()
-        activateHue()
         activateHue()
 	}
     else if (switchValue) {
@@ -198,9 +183,17 @@ private activateHue() {
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
 			light.on()
+            pause(25)
+            light.on()
+            pause(25)
+            light.on()
 		}
 		else {
 			light.off()
+            pause(25)
+            light.off()
+            pause(25)
+            light.off()
 		}
 		if (type != "switch" && moodOk) {
 			def level = switchLevel(light)
@@ -208,6 +201,10 @@ private activateHue() {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(level)
+                    pause(25)
+                    light.setLevel(level)
+                    pause(25)
+                    light.setLevel(level)
 				}
 			}
 			else if (type == "color") {
@@ -263,15 +260,27 @@ private activateHue() {
 				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 				if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
+                    pause(25)
+                    light.setColor(level: level, hue: hue, saturation: saturation)
+                    pause(25)
+                    light.setColor(level: level, hue: hue, saturation: saturation)
 				}
 				else {
 					light.setColor(hue: hue, saturation: saturation)
+                    pause(25)
+                    light.setColor(hue: hue, saturation: saturation)
+                    pause(25)
+                    light.setColor(hue: hue, saturation: saturation)
 				}
 			}
 			else {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(level)
+                    pause(25)
+                    light.setLevel(level)
+                    pause(25)
+                    light.setLevel(level)
 				}
 			}
 		}	
@@ -349,10 +358,6 @@ private getMoodOk() {
 	}
 }
 
-private getAllOk() {
-	modeOk && daysOk && timeOk
-}
-
 private getModeOk() {
 	def result = !modes || modes.contains(location.mode)
 	log.trace "modeOk = $result"
@@ -388,15 +393,40 @@ private getTimeOk() {
 	result
 }
 
-private hhmm(time, fmt = "h:mm a")
-{
-	def t = timeToday(time, location.timeZone)
-	def f = new java.text.SimpleDateFormat(fmt)
-	f.setTimeZone(location.timeZone ?: timeZone(time))
-	f.format(t)
+private getSwitchOnScene() {
+	def result = true
+	if (ifSwitchOn) {
+		def current = ifSwitchOn.currentValue('switch')
+		def switchOnValue = ifSwitchOn.find{it.currentSwitch == "on"}
+		if (switchOnValue) {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOnScene = $result"
+	result
 }
 
-private timeIntervalLabel()
-{
-	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
+private getSwitchOffScene() {
+	def result = true
+	if (ifSwitchOff) {
+		def current = ifSwitchOff.currentValue('switch')
+		def switchOffValue = ifSwitchOff.find{it.currentSwitch == "on"}
+		if (switchOffValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOffScene = $result"
+	result
 }

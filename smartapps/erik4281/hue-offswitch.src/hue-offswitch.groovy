@@ -78,8 +78,6 @@ def subscribeToEvents() {
 def appTouchHandler(evt) {
 	log.info "app started manually"
     deactivateHue()
-    deactivateHue()
-    deactivateHue()
 }
 
 def switchHandler(evt) {
@@ -91,8 +89,6 @@ def switchHandler(evt) {
     }
 	else {
         deactivateHue()
-        deactivateHue()
-    	deactivateHue()
     }
 }
 
@@ -104,6 +100,12 @@ private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
     lights.each {light ->
+        light.off()
+        pause(25)
+        light.off()
+        pause(25)
+        light.off()
+        pause(25)
         light.off()
     }
 }
