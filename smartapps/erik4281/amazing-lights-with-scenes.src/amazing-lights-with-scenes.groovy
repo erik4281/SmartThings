@@ -48,13 +48,13 @@ def switchPage() {
 			input "motionSensor", "capability.motionSensor", title: "Motion here", required: false, multiple: true
 			input "contactSensor", "capability.contactSensor", title: "Contact opens", required: false, multiple: true
 			input "inputSwitch", "capability.switch", title: "Switch turns on", required: false, multiple: true
-			input "triggerModes", "mode", title: "System changes mode", required: false, multiple: true
-			input "timeOfDay", "time", title: "At a scheduled time", required: false
+			//input "triggerModes", "mode", title: "System changes mode", required: false, multiple: true
+			//input "timeOfDay", "time", title: "At a scheduled time", required: false
 		}
 		section("Switch off when..."){
 			input "delayMinutes", "number", title: "Off after x minutes of motion/contact", required: false
-			input "triggerModesOff", "mode", title: "System changes mode", required: false, multiple: true
-			input "timeOfDayOff", "time", title: "At a scheduled time", required: false
+			//input "triggerModesOff", "mode", title: "System changes mode", required: false, multiple: true
+			//input "timeOfDayOff", "time", title: "At a scheduled time", required: false
 		}
 		section("Or switch off faster") {
 			input "shortDelayMinutes", "number", title: "Off after x minutes", required: false
@@ -170,15 +170,15 @@ def initialize() {
 	if (lightSensor) {
 		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])
 	}
-	if (triggerModes || triggerModesOff) {
-		subscribe(location, modeChangeHandler)
-	}
-	if (timeOfDay) {
-		schedule(timeOfDay, scheduledTimeHandler)
-	}
-	if (timeOfDayOff) {
-		schedule(timeOfDayOff, scheduledTimeOffHandler)
-	}
+	//if (triggerModes || triggerModesOff) {
+	//	subscribe(location, modeChangeHandler)
+	//}
+	//if (timeOfDay) {
+	//	schedule(timeOfDay, scheduledTimeHandler)
+	//}
+	//if (timeOfDayOff) {
+	//	schedule(timeOfDayOff, scheduledTimeOffHandler)
+	//}
 }
 
 /******************
@@ -209,11 +209,11 @@ def appTouchHandler(evt) {
 def eventHandler(evt) {
 	log.trace "eventHandler: $evt.name: $evt.value"
 	state.eventStopTime = null
-	if (modeOk && daysOk && timeOk) {
-		if (darkOk && moodOk) {
-			log.info "All checks OK, switching on now"
-            activateHue()
-		}
+	if (modeOk && daysOk && timeOk && darkOk && moodOk) {
+		//if (darkOk && moodOk) {
+		log.info "All checks OK, switching on now"
+		activateHue()
+		//}
 	}
 }
 
@@ -278,26 +278,26 @@ def illuminanceHandler(evt) {
 	}
 }
 
-def modeChangeHandler(evt) {
-	if (evt.value in triggerModes) {
-		pause(2000)
-		activateHue()
-	}
-	if (evt.value in triggerModesOff) {
-		pause(2000)
-		deactivateHue()
-	}
-}
+//def modeChangeHandler(evt) {
+//	if (evt.value in triggerModes) {
+//		pause(2000)
+//		activateHue()
+//	}
+//	if (evt.value in triggerModesOff) {
+//		pause(2000)
+//		deactivateHue()
+//	}
+//}
 
-def scheduledTimeHandler() {
-	pause(2000)
-	activateHue()
-}
+//def scheduledTimeHandler() {
+//	pause(2000)
+//	activateHue()
+//}
 
-def scheduledTimeOffHandler() {
-	pause(2000)
-	deactivateHue()
-}
+//def scheduledTimeOffHandler() {
+//	pause(2000)
+//	deactivateHue()
+//}
 
 /********************
  * Actuator methods *

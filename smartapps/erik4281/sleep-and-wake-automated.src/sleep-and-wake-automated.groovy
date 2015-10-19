@@ -145,13 +145,15 @@ def startSleepMode() {
 	if (sleepOn) {
 		sleepOn.each {light ->
 			light.on()
-			light.on()
+			pause(25)
+            light.on()
 		}
 	}
 	if (sleepOff) {
 		sleepOff.each {light ->
 			light.off()
-			light.off()
+			pause(25)
+            light.off()
 		}
 	}
 }
@@ -172,13 +174,15 @@ def startWakeMode() {
 	if (wakeUpOn) {
 		wakeUpOn.each {light ->
 			light.on()
-			light.on()
+			pause(25)
+            light.on()
 		}
 	}
 	if (wakeUpOff) {
 		wakeUpOff.each {light ->
 			light.off()
-			light.off()
+			pause(25)
+            light.off()
 		}
 	}
 }
