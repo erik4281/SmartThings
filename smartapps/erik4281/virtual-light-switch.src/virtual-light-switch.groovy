@@ -355,3 +355,39 @@ private getTimeOk() {
 	log.trace "timeOk = $result"
 	result
 }
+
+private getMoodOk() {
+	def result = true
+	if (moodSwitch) {
+		if (moodSwitch.currentSwitch == "off") {
+			result = true
+		}
+		else {
+			result = false
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "moodOk = $result"
+	result
+}
+
+private getSwitchOff() {
+	def result = true
+	if (inputSwitch) {
+		def current = inputSwitch.currentValue('switch')
+		def switchValue = inputSwitch.find{it.currentSwitch == "on"}
+		if (switchValue) {
+			result = false
+		}
+		else {
+			result = true
+		}
+	}
+	else {
+		result = true
+	}
+	log.trace "switchOff = $result"
+	result
+}
