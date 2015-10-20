@@ -99,13 +99,14 @@ def switchHandler(evt) {
 private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
+	def wait = 10
 	lights.each {light ->
 		light.off()
-		pause(25)
+		pause(wait)
 		light.off()
-		pause(25)
+		pause(wait)
 		light.off()
-		pause(25)
+		pause(wait)
 		light.off()
 	}
 }
