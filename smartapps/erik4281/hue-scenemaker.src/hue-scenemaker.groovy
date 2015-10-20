@@ -1,5 +1,5 @@
 /**
- *  Hue SceneMaker
+ *  Virtual Light Switch
  *
  *  Copyright 2015 Erik Vennink
  *
@@ -19,74 +19,48 @@
  ************/
 
 definition(
-    name: "Hue SceneMaker",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Switch on and set Hue lights based on an (virtual) switch.",
-    category: "Convenience",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+	name: "Virtual Light Switch",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Use this app to create virtual light switches, which can be activated by motion or open/close sensors. These switches can be used to control lights with a separate app. ",
+	category: "Safety & Security",
+	iconUrl: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
+	iconX2Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
+	iconX3Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png")
 
 /**********
  * Setup  *
  **********/
 
 preferences {
-    page(name: "lightSelectPage", title: "Turn on these lights:", nextPage: "optionsPage", params: [sceneId:sceneId], uninstall: true) 
-    page(name: "optionsPage", title: "Use these options:", install: true, uninstall: true) 
+	page(name: "switchPage", title: "Switch on lights when this happens:", install: true, uninstall: true) 
 }
 
-def lightSelectPage() {
-	dynamicPage(name: "lightSelectPage") {
-        section("Use this (virtual) switch"){
-            input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
-        }
-		section("To control these lights") {
-			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
+def switchPage() {
+	dynamicPage(name: "switchPage") {
+		section("Control these switches") {
+			input "switching", "capability.switch", title: "Which switches?", required:true, multiple:true
 		}
-		section("Timing options") {
-			input "starting", "time", title: "Starting from (also change to this setting when already on...)", required: false
-			input "ending", "time", title: "Ending at", required: false
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+		section("Monitor sensors..."){
+			input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
+			input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
+			input "inputSwitch", "capability.switch", title: "Switches (using short-delay time)", required: false, multiple: true
+			input "delayMinutes", "number", title: "Off after x minutes", required: false
 		}
-        section("Lights will also change to these when the mode changes to the selected modes. This only happens when the input switch is enabled!")
-        section("Only trigger when this switch is ON/OFF") {
-        	input "ifSwitchOn", "capability.switch", title: "Switch on", required: false
-            input "ifSwitchOff", "capability.switch", title: "Switch off", required: false
-        }
-		section("Use MoodCube switch (disable auto-switching light)") {
-			input "moodSwitch", "capability.switch", title: "Switch", required: false
+		section("Monitor illuminance sensor") {
+			input "lightSensor", "capability.illuminanceMeasurement", title: "Sensor(s)?", required: false
+			input "lightOnValue", "number", title: "On at < (Lux, empty = 100)?", required: false
+			input "lightOffValue", "number", title: "Off at > (Lux, empty = 150)?", required: false
+		}
+		section("Short-delay-mode (for example sleep...)") {
+			input "shortModes", "mode", title: "In which mode(s)", required: false, multiple: true
+			input "shortStarting", "time", title: "And starting from", required: false
+			input "shortEnding", "time", title: "And ending at", required: false
+			input "shortDelayMinutes", "number", title: "Off after x minutes", required: false
 		}
 		section([mobileOnly:true]) {
+			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 			label title: "Assign a name", required: false
-		}
-    }
-}
-
-def optionsPage(params) {
-	dynamicPage(name: "optionsPage") {
-		section("Lights") {
-			lights.each {light ->
-				input "onoff_${light.id}", "boolean", title: light.displayName
-			}
-		}
-		section("Dimmers") {
-			lights.each {light ->
-				input "level_${light.id}", "enum", title: light.displayName, options: levels, description: "", required: false
-			}
-		}
-		section("Colors") {
-			lights.each {light ->
-				input "color_${light.id}", "enum", title: light.displayName, required: false, multiple:false, options: [
-					["Soft White":"Soft White - Default"],
-					["White":"White - Concentrate"],
-					["Daylight":"Daylight - Energize"],
-					["Warm White":"Warm White - Relax"],
-					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
-			}
 		}
 	}
 }
@@ -109,19 +83,15 @@ def updated() {
 
 def subscribeToEvents() {
 	subscribe(app, appTouchHandler)
-	subscribe(inputSwitch, "switch", eventHandler)
-	if (starting) {
-    	schedule(starting, timerHandler)
-    }
-    if (modes) {
-		subscribe(location, timerHandler)
+	subscribe(motionSensor, "motion.active", eventHandler)
+	subscribe(contactSensor, "contact.open", eventHandler)
+	subscribe(inputSwitch, "switch.on", eventHandler)
+	subscribe(motionSensor, "motion.inactive", eventOffHandler)
+	subscribe(contactSensor, "contact.closed", eventOffHandler)
+	subscribe(inputSwitch, "switch.off", eventOffHandler)
+	if (lightSensor) {
+		subscribe(lightSensor, "illuminance", illuminanceHandler, [filterEvents: false])
 	}
-    if (ifSwitchOn) {
-    	subscribe(ifSwitchOn, "switch", eventHandler)
-    }
-    if (ifSwitchOff) {
-    	subscribe(ifSwitchOff, "switch", eventHandler)
-    }
 }
 
 /******************
@@ -129,39 +99,94 @@ def subscribeToEvents() {
  ******************/
 
 def appTouchHandler(evt) {
-	log.info "app started manually"
-    activateHue()
+	log.trace "app started manually"
+	activateSwitch()
+	def current = motionSensor.currentValue("motion")
+	def motionValue = motionSensor.find{it.currentMotion == "active"}
+	if (motionValue) {
+		state.eventStopTime = null
+	}
+	else {
+		state.eventStopTime = now()
+	}
+	if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+	}
+	else if (delayMinutes) {
+		runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+	}
+	else  {
+		turnOffAfterDelay()
+	}
 }
 
 def eventHandler(evt) {
-	log.trace "switchHandler()"
-	def current = inputSwitch.currentValue('switch')
-	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
-        activateHue()
-	}
-	else if (switchValue) {
-    	log.info "Wrong mode to activate anything"
-    }
-	else {
-        log.info "Nothing to do..."
+	log.trace "eventHandler: $evt.name: $evt.value"
+	state.eventStopTime = null
+	if (modeOk && daysOk && timeOk && darkOk && moodOk) {
+		log.info "All checks OK, switching on now"
+		activateSwitch()
 	}
 }
 
-def timerHandler() {
-	log.trace "scheduledTimeHandler()"
-	pause(2000)
-	def current = inputSwitch.currentValue('switch')
-	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
-    	log.trace "do it!"
-        activateHue()
+def eventOffHandler(evt) {
+	log.trace "eventHandler: $evt.name: $evt.value"
+	state.eventStopTime = now()
+	if (evt.name == "switch" && evt.value == "off" && moodOk) {
+		log.info "Switch was set to off. Starting timer to switch off."
+		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 	}
-    else if (switchValue) {
-    	log.info "Wrong mode to activate anything"
+	else if (switchOff && modeOk && daysOk && timeOk && moodOk) {
+		log.info "Switches are off and all checks passed"
+		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+			log.info "Now starting short timer to switch off"
+			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+		}
+		else if (delayMinutes) {
+			log.info "Now starting normal timer to switch off"
+			runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+		}
+		else  {
+			log.info "Now starting to switch off"
+			turnOffAfterDelay()
+		}
 	}
-    else {
-    	log.info "Nothing to do..."
+	else if (switchOff && moodOk) {
+		log.info "Now starting 30 minute timer for backup off switching"
+		runIn(30*60, turnOffAfterDelay, [overwrite: false])
+	}
+}
+
+def illuminanceHandler(evt) {
+	if (modeOk && daysOk && timeOk && moodOk) {
+		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
+			log.info "Light was not off and brightness was too high"
+			deactivateSwitch()
+		}
+		else if (state.eventStopTime) {
+			if (state.lastStatus != "off" && switchOff) {
+				log.info "Light was not off and not currently activated"
+				def elapsed = now() - state.eventStopTime                
+				if((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+					if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+						deactivateSwitch()
+					}
+				}
+				else if(delayMinutes) {
+					if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+						deactivateSwitch()
+					}
+				}
+			}
+			else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
+				log.info "Light was not on and brightness was too low"
+				activateSwitch()
+			}
+		}
+		else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
+			log.info "Light was not on and brightness was too low"
+			activateSwitch()
+		}
 	}
 }
 
@@ -169,162 +194,62 @@ def timerHandler() {
  * Helper methods *
  ******************/
 
-private closestLevel(level) {
-	level ? "${Math.round(level/5) * 5}%" : "0%"
+def turnOffAfterDelay() {
+	if (state.eventStopTime && state.lastStatus != "off") {
+		def elapsed = now() - state.eventStopTime
+		if (elapsed >= ((delayMinutes ?: 0) * 60000L) - 2000) {
+			log.info "Deactivating started"
+			deactivateSwitch()
+		}
+	}
 }
 
-private activateHue() {
-	log.trace "Activating!"
+def turnOffAfterDelayShort() {
+	if (state.eventStopTime && state.lastStatus != "off") {
+		def elapsed = now() - state.eventStopTime
+		if (elapsed >= ((shortDelayMinutes ?: 0) * 60000L) - 2000) {
+			log.info "Deactivating started"
+			deactivateSwitch()
+		}
+	}
+}
+
+def activateSwitch() {
+	def current = switching.currentValue('switch')
+	def switchValue = switching.find{it.currentSwitch == "off"}
+	if (switchValue) {
+		startSwitch(switching)
+	}
+	log.debug "Setting state to On"
 	state.lastStatus = "on"
-	getDeviceCapabilities()
-	lights.each {light ->
-		def type = state.lightCapabilities[light.id]
-		def isOn = settings."onoff_${light.id}" == "true" ? true : false
-		log.debug "${light.displayName} is '$isOn'"
-		if (isOn) {
-			light.on()
-            pause(25)
-            light.on()
-            pause(25)
-            light.on()
-		}
-		else {
-			light.off()
-            pause(25)
-            light.off()
-            pause(25)
-            light.off()
-		}
-		if (type != "switch" && moodOk) {
-			def level = switchLevel(light)
-			if (type == "level") {
-				log.debug "${light.displayName} level is '$level'"
-				if (level != null) {
-					light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
-				}
-			}
-			else if (type == "color") {
-				def hue = 23
-				def saturation = 56
-                log.info settings."color_${light.id}"
-				switch(settings."color_${light.id}") {
-					case "White":
-						hue = 52
-						saturation = 19
-						break;
-					case "Daylight":
-						hue = 53
-						saturation = 91
-						break;
-					case "Soft White":
-						hue = 23
-						saturation = 56
-						break;
-					case "Warm White":
-						hue = 20
-						saturation = 80 //83
-						break;
-					case "Blue":
-						hue = 70
-			            saturation = 100
-						break;
-					case "Green":
-						hue = 39
-			            saturation = 100
-						break;
-					case "Yellow":
-						hue = 25
-			            saturation = 100
-						break;
-					case "Orange":
-						hue = 10
-			            saturation = 100
-						break;
-					case "Purple":
-						hue = 75
-			            saturation = 100
-						break;
-					case "Pink":
-						hue = 83
-			            saturation = 100
-						break;
-					case "Red":
-						hue = 100
-			            saturation = 100
-						break;
-				}
-				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
-				if (level != null) {
-					light.setColor(level: level, hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(level: level, hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(level: level, hue: hue, saturation: saturation)
-				}
-				else {
-					light.setColor(hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(hue: hue, saturation: saturation)
-				}
-			}
-			else {
-				log.debug "${light.displayName} level is '$level'"
-				if (level != null) {
-					light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
-				}
-			}
-		}	
-		else {
-			log.error "Unknown type '$type'"
-		}		
+}
+
+def deactivateSwitch() {
+	def current = switching.currentValue('switch')
+	def switchValue = switching.find{it.currentSwitch == "on"}
+	if (switchValue) {
+		stopSwitch(switching)
+	}
+	log.debug "Setting state to Off"
+	state.lastStatus = "off"
+}
+
+def startSwitch(switchSelect) {
+	def check = switchSelect.currentValue('switch')
+	log.debug "Check: $check"
+	if (check != "[on]") {
+		log.trace "Activating Switch '$switchSelect'"
+		switchSelect.on()
 	}
 }
 
-private switchLevel(light) {
-	def percent = settings."level_${light.id}"
-	if (percent) {
-		percent[0..-2].toInteger()
+def stopSwitch(switchSelect) {
+	def check = switchSelect.currentValue('switch')
+	log.debug "Check: $check"
+	if (check != "[off]") {
+		log.trace "Deactivating Switch '$switchSelect'"
+		switchSelect.off()
 	}
-	else {
-		null
-	}
-}
-
-private getDeviceCapabilities() {
-	def caps = [:]
-	lights.each {
-		if (it.hasCapability("Color Control")) {
-			log.debug "colorlight"
-            caps[it.id] = "color"
-		}
-		else if (it.hasCapability("Switch Level")) {
-			log.debug "levellight"
-            caps[it.id] = "level"
-		}
-		else {
-			log.debug "switchlight"
-            caps[it.id] = "switch"
-		}
-	}
-	state.lightCapabilities = caps
-}
-
-private getLevels() {
-	def levels = []
-	for (int i = 0; i <= 100; i += 10) {
-		levels << "$i%"
-	}
-	levels
 }
 
 private dayString(Date date) {
@@ -338,24 +263,16 @@ private dayString(Date date) {
 	df.format(date)
 }
 
-private getMoodOk() {
-	if (moodSwitch) {
-    	if (moodSwitch.currentSwitch == "off") {
-			def result = true
-        	log.trace "Switch is available and off: moodOK = ${result}"
-    		result
-    	}
-        else {
-        	def result = false
-            log.trace "Switch is available and on: moodOK = ${result}"
-            result
-    	}
-    }
-    else {
-    	def result = true
-        log.trace "Switch is NOT available: moodOk = ${result}"
-    	result
+private getDarkOk() {
+	def result = true
+	if (lightSensor) {
+		result = lightSensor.currentIlluminance < (lightOnValue ?: 100)
 	}
+	else {
+		result = true
+	}
+	log.trace "darkOk = $result"
+	result
 }
 
 private getModeOk() {
@@ -364,18 +281,36 @@ private getModeOk() {
 	result
 }
 
+private getShortModeOk() {
+	def result = !shortModes || shortModes.contains(location.mode)
+	log.trace "shortModeOk = $result"
+	result
+}
+
+private getShortTimeOk() {
+	def result = false
+	if (shortStarting && shortEnding) {
+		def currTime = now()
+		def shortStart = timeToday(shortStarting).time
+		def shortStop = timeToday(shortEnding).time
+		result = shortStart < shortStop ? currTime >= shortStart && currTime <= shortStop : currTime <= shortStop || currTime >= shortStart
+	}
+	log.trace "shortTimeOk = $result"
+	result
+}
+
 private getDaysOk() {
 	def result = true
 	if (days) {
 		def df = new java.text.SimpleDateFormat("EEEE")
 		if (location.timeZone) {
-			df.setTimeZone(location.timeZone)
-		}
-		else {
-			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-		}
-		def day = df.format(new Date())
-		result = days.contains(day)
+		df.setTimeZone(location.timeZone)
+	}
+	else {
+		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+	}
+	def day = df.format(new Date())
+	result = days.contains(day)
 	}
 	log.trace "daysOk = $result"
 	result
@@ -393,12 +328,10 @@ private getTimeOk() {
 	result
 }
 
-private getSwitchOnScene() {
+private getMoodOk() {
 	def result = true
-	if (ifSwitchOn) {
-		def current = ifSwitchOn.currentValue('switch')
-		def switchOnValue = ifSwitchOn.find{it.currentSwitch == "on"}
-		if (switchOnValue) {
+	if (moodSwitch) {
+		if (moodSwitch.currentSwitch == "off") {
 			result = true
 		}
 		else {
@@ -408,16 +341,16 @@ private getSwitchOnScene() {
 	else {
 		result = true
 	}
-	log.trace "switchOnScene = $result"
+	log.trace "moodOk = $result"
 	result
 }
 
-private getSwitchOffScene() {
+private getSwitchOff() {
 	def result = true
-	if (ifSwitchOff) {
-		def current = ifSwitchOff.currentValue('switch')
-		def switchOffValue = ifSwitchOff.find{it.currentSwitch == "on"}
-		if (switchOffValue) {
+	if (inputSwitch) {
+		def current = inputSwitch.currentValue('switch')
+		def switchValue = inputSwitch.find{it.currentSwitch == "on"}
+		if (switchValue) {
 			result = false
 		}
 		else {
@@ -427,6 +360,6 @@ private getSwitchOffScene() {
 	else {
 		result = true
 	}
-	log.trace "switchOffScene = $result"
+	log.trace "switchOff = $result"
 	result
 }
