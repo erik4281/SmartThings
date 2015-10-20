@@ -19,35 +19,35 @@
  ************/
 
 definition(
-    name: "Hue OffSwitch",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Switch off Hue lights based on an (virtual) switch.",
-    category: "Green Living",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+	name: "Hue OffSwitch",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Switch off Hue lights based on an (virtual) switch.",
+	category: "Green Living",
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+	iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
 
 /**********
  * Setup  *
  **********/
 
 preferences {
-    page(name: "lightSelectPage", title: "Turn off these lights:", install: true, params: [sceneId:sceneId], uninstall: true) 
+	page(name: "lightSelectPage", title: "Turn off these lights:", install: true, params: [sceneId:sceneId], uninstall: true) 
 }
 
 def lightSelectPage() {
 	dynamicPage(name: "lightSelectPage") {
-        section("Use this (virtual) switch") {
-            input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
-        }
+		section("Use this (virtual) switch") {
+			input "inputSwitch", "capability.switch", title: "Switches", required: true, multiple: true
+		}
 		section("To switch off these lights (when the switch is OFF)") {
 			input "lights", "capability.switchLevel", multiple: true, required: false, title: "Lights, switches & dimmers"
 		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name", required: false
 		}
-    }
+	}
 }
 
 /*************************
@@ -77,7 +77,7 @@ def subscribeToEvents() {
 
 def appTouchHandler(evt) {
 	log.info "app started manually"
-    deactivateHue()
+	deactivateHue()
 }
 
 def switchHandler(evt) {
@@ -85,11 +85,11 @@ def switchHandler(evt) {
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue) {
-    	log.info "Wrong mode to activate anything"
-    }
+		log.info "Wrong mode to activate anything"
+	}
 	else {
-        deactivateHue()
-    }
+		deactivateHue()
+	}
 }
 
 /******************
@@ -99,13 +99,13 @@ def switchHandler(evt) {
 private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
-    lights.each {light ->
-        light.off()
-        pause(25)
-        light.off()
-        pause(25)
-        light.off()
-        pause(25)
-        light.off()
-    }
+	lights.each {light ->
+		light.off()
+		pause(25)
+		light.off()
+		pause(25)
+		light.off()
+		pause(25)
+		light.off()
+	}
 }
