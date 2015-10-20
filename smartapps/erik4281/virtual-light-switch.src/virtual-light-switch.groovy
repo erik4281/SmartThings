@@ -19,34 +19,34 @@
  ************/
 
 definition(
-    name: "Virtual Light Switch",
-    namespace: "erik4281",
-    author: "Erik Vennink",
-    description: "Use this app to create virtual light switches, which can be activated by motion or open/close sensors. These switches can be used to control lights with a separate app. ",
-    category: "Safety & Security",
-    iconUrl: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
-    iconX2Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
-    iconX3Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png")
+	name: "Virtual Light Switch",
+	namespace: "erik4281",
+	author: "Erik Vennink",
+	description: "Use this app to create virtual light switches, which can be activated by motion or open/close sensors. These switches can be used to control lights with a separate app. ",
+	category: "Safety & Security",
+	iconUrl: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
+	iconX2Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png",
+	iconX3Url: "http://icons.iconarchive.com/icons/saki/nuoveXT-2/128/Actions-system-shutdown-icon.png")
 
 /**********
  * Setup  *
  **********/
 
 preferences {
-    page(name: "switchPage", title: "Switch on lights when this happens:", install: true, uninstall: true) 
+	page(name: "switchPage", title: "Switch on lights when this happens:", install: true, uninstall: true) 
 }
 
 def switchPage() {
 	dynamicPage(name: "switchPage") {
-        section("Control these switches") {
-            input "switching", "capability.switch", title: "Which switches?", required:true, multiple:true
-        }
-        section("Monitor sensors..."){
-            input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
-            input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
+		section("Control these switches") {
+			input "switching", "capability.switch", title: "Which switches?", required:true, multiple:true
+		}
+		section("Monitor sensors..."){
+			input "motionSensor", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
+			input "contactSensor", "capability.contactSensor", title: "Contact Opens", required: false, multiple: true
 			input "inputSwitch", "capability.switch", title: "Switches (using short-delay time)", required: false, multiple: true
-            input "delayMinutes", "number", title: "Off after x minutes", required: false
-        }
+			input "delayMinutes", "number", title: "Off after x minutes", required: false
+		}
 		section("Monitor illuminance sensor") {
 			input "lightSensor", "capability.illuminanceMeasurement", title: "Sensor(s)?", required: false
 			input "lightOnValue", "number", title: "On at < (Lux, empty = 100)?", required: false
@@ -100,7 +100,7 @@ def subscribeToEvents() {
 
 def appTouchHandler(evt) {
 	log.trace "app started manually"
-    activateSwitch()
+	activateSwitch()
 	def current = motionSensor.currentValue("motion")
 	def motionValue = motionSensor.find{it.currentMotion == "active"}
 	if (motionValue) {
@@ -134,26 +134,26 @@ def eventOffHandler(evt) {
 	state.eventStopTime = now()
 	if (evt.name == "switch" && evt.value == "off" && moodOk) {
 		log.info "Switch was set to off. Starting timer to switch off."
-        runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 	}
 	else if (switchOff && modeOk && daysOk && timeOk && moodOk) {
 		log.info "Switches are off and all checks passed"
-        if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 			log.info "Now starting short timer to switch off"
-            runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 		}
 		else if (delayMinutes) {
 			log.info "Now starting normal timer to switch off"
-            runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+			runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
 		}
 		else  {
 			log.info "Now starting to switch off"
-            turnOffAfterDelay()
+			turnOffAfterDelay()
 		}
 	}
 	else if (switchOff && moodOk) {
 		log.info "Now starting 30 minute timer for backup off switching"
-        runIn(30*60, turnOffAfterDelay, [overwrite: false])
+		runIn(30*60, turnOffAfterDelay, [overwrite: false])
 	}
 }
 
@@ -161,7 +161,7 @@ def illuminanceHandler(evt) {
 	if (modeOk && daysOk && timeOk && moodOk) {
 		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
 			log.info "Light was not off and brightness was too high"
-            deactivateSwitch()
+			deactivateSwitch()
 		}
 		else if (state.eventStopTime) {
 			if (state.lastStatus != "off" && switchOff) {
@@ -180,12 +180,12 @@ def illuminanceHandler(evt) {
 			}
 			else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
 				log.info "Light was not on and brightness was too low"
-                activateSwitch()
+				activateSwitch()
 			}
 		}
 		else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
 			log.info "Light was not on and brightness was too low"
-            activateSwitch()
+			activateSwitch()
 		}
 	}
 }
@@ -214,31 +214,30 @@ def turnOffAfterDelayShort() {
 	}
 }
 
-
 def activateSwitch() {
 	def current = switching.currentValue('switch')
 	def switchValue = switching.find{it.currentSwitch == "off"}
-    if (switchValue) {
-        startSwitch(switching)
-    }
+	if (switchValue) {
+		startSwitch(switching)
+	}
 	log.debug "Setting state to On"
-    state.lastStatus = "on"
+	state.lastStatus = "on"
 }
 
 def deactivateSwitch() {
 	def current = switching.currentValue('switch')
 	def switchValue = switching.find{it.currentSwitch == "on"}
-    if (switchValue) {
-        stopSwitch(switching)
-    }
-    log.debug "Setting state to Off"
-    state.lastStatus = "off"
+	if (switchValue) {
+		stopSwitch(switching)
+	}
+	log.debug "Setting state to Off"
+	state.lastStatus = "off"
 }
 
 def startSwitch(switchSelect) {
 	def check = switchSelect.currentValue('switch')
-    log.debug "Check: $check"
-    if (check != "[on]") {
+	log.debug "Check: $check"
+	if (check != "[on]") {
 		log.trace "Activating Switch '$switchSelect'"
 		switchSelect.on()
 	}
@@ -246,10 +245,10 @@ def startSwitch(switchSelect) {
 
 def stopSwitch(switchSelect) {
 	def check = switchSelect.currentValue('switch')
-    log.debug "Check: $check"
-    if (check != "[off]") {
-        log.trace "Deactivating Switch '$switchSelect'"
-        switchSelect.off()
+	log.debug "Check: $check"
+	if (check != "[off]") {
+		log.trace "Deactivating Switch '$switchSelect'"
+		switchSelect.off()
 	}
 }
 
@@ -262,33 +261,6 @@ private dayString(Date date) {
 		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
 	}
 	df.format(date)
-}
-
-private getAllOkExtra() {
-	modeOk && daysOk && timeOk && darkOk
-}
-
-private getAllOk() {
-	modeOk && daysOk && timeOk
-}
-
-private getSwitchOk() {
-	def result = true
-	if (inputSwitch) {
-    	def current = inputSwitch.currentValue('switch')
-		def switchValue = inputSwitch.find{it.currentSwitch == "on"}
-		if (switchValue) {
-    		result = false
-        }
-        else {
-        	result = true
-        }
-    }
-    else {
-    	result = true
-    }
-    log.trace "switchOk = $result"
-    result
 }
 
 private getDarkOk() {
@@ -332,13 +304,13 @@ private getDaysOk() {
 	if (days) {
 		def df = new java.text.SimpleDateFormat("EEEE")
 		if (location.timeZone) {
-			df.setTimeZone(location.timeZone)
-		}
-		else {
-			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-		}
-		def day = df.format(new Date())
-		result = days.contains(day)
+		df.setTimeZone(location.timeZone)
+	}
+	else {
+		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+	}
+	def day = df.format(new Date())
+	result = days.contains(day)
 	}
 	log.trace "daysOk = $result"
 	result
