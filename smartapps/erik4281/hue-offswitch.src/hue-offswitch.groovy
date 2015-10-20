@@ -77,17 +77,27 @@ def subscribeToEvents() {
 
 def appTouchHandler(evt) {
 	log.info "app started manually"
+	def wait = 10
+	deactivateHue()
+	pause(wait)
+	deactivateHue()
+	pause(wait)
 	deactivateHue()
 }
 
 def switchHandler(evt) {
 	log.trace "switchHandler()"
+	def wait = 10
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue) {
 		log.info "Wrong mode to activate anything"
 	}
 	else {
+		deactivateHue()
+		pause(wait)
+		deactivateHue()
+		pause(wait)
 		deactivateHue()
 	}
 }
@@ -99,14 +109,7 @@ def switchHandler(evt) {
 private deactivateHue() {
 	log.trace "Deactivating!"
 	state.lastStatus = "off"
-	def wait = 10
 	lights.each {light ->
-		light.off()
-		pause(wait)
-		light.off()
-		pause(wait)
-		light.off()
-		pause(wait)
 		light.off()
 	}
 }

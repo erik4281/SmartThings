@@ -130,15 +130,25 @@ def subscribeToEvents() {
 
 def appTouchHandler(evt) {
 	log.info "app started manually"
+	def wait = 10
+	activateHue()
+	pause(wait)
+	activateHue()
+	pause(wait)
 	activateHue()
 }
 
 def eventHandler(evt) {
 	log.trace "switchHandler()"
+	def wait = 10
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
 		activateHue()
+        pause(wait)
+        activateHue()
+        pause(wait)
+        activateHue()
 	}
 	else if (switchValue) {
 		log.info "Wrong mode to activate anything"
@@ -151,11 +161,16 @@ def eventHandler(evt) {
 def scheduledTimeHandler() {
 	log.trace "scheduledTimeHandler()"
 	pause(2000)
+	def wait = 10
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
 		log.trace "do it!"
 		activateHue()
+        pause(wait)
+        activateHue()
+        pause(wait)
+        activateHue()
 	}
 	else if (switchValue) {
 		log.info "Wrong mode to activate anything"
@@ -168,11 +183,16 @@ def scheduledTimeHandler() {
 def modeChangeHandler(evt) {
 	log.trace "modeChangeHandler()"
 	pause(2000)
+	def wait = 10
 	def current = inputSwitch.currentValue('switch')
 	def switchValue = inputSwitch.find{it.currentSwitch == "on"}
 	if (switchValue && modeOk && daysOk && timeOk && switchOnScene && switchOffScene) {
 		log.trace "do it!"
 		activateHue()
+        pause(wait)
+        activateHue()
+        pause(wait)
+        activateHue()
 	}
 	else if (switchValue) {
 		log.info "Wrong mode to activate anything"
@@ -194,23 +214,14 @@ private activateHue() {
 	log.trace "Activating!"
 	state.lastStatus = "on"
 	getDeviceCapabilities()
-	def wait = 10
 	lights.each {light ->
 		def type = state.lightCapabilities[light.id]
 		def isOn = settings."onoff_${light.id}" == "true" ? true : false
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
 			light.on()
-			pause(wait)
-			light.on()
-			pause(wait)
-			light.on()
 		}
 		else {
-			light.off()
-			pause(wait)
-			light.off()
-			pause(wait)
 			light.off()
 		}
 		if (type != "switch" && moodOk) {
@@ -218,10 +229,6 @@ private activateHue() {
 			if (type == "level") {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
-					light.setLevel(level)
-					pause(wait)
-					light.setLevel(level)
-					pause(wait)
 					light.setLevel(level)
 				}
 			}
@@ -278,26 +285,14 @@ private activateHue() {
 				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 				if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
-					pause(wait)
-					light.setColor(level: level, hue: hue, saturation: saturation)
-					pause(wait)
-					light.setColor(level: level, hue: hue, saturation: saturation)
 				}
 				else {
-					light.setColor(hue: hue, saturation: saturation)
-					pause(wait)
-					light.setColor(hue: hue, saturation: saturation)
-					pause(wait)
 					light.setColor(hue: hue, saturation: saturation)
 				}
 			}
 			else {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
-					light.setLevel(level)
-					pause(wait)
-					light.setLevel(level)
-					pause(wait)
 					light.setLevel(level)
 				}
 			}
@@ -334,8 +329,8 @@ private getDeviceCapabilities() {
 			caps[it.id] = "switch"
 		}
 	}
-		state.lightCapabilities = caps
-	}
+    state.lightCapabilities = caps
+}
 
 private getLevels() {
 	def levels = []
