@@ -83,6 +83,10 @@ def appTouchHandler(evt) {
 	deactivateHue()
 	pause(wait)
 	deactivateHue()
+	pause(wait)
+	deactivateHue()
+	pause(wait)
+	deactivateHue()
 }
 
 def switchHandler(evt) {
@@ -94,6 +98,10 @@ def switchHandler(evt) {
 		log.info "Wrong mode to activate anything"
 	}
 	else {
+		deactivateHue()
+		pause(wait)
+		deactivateHue()
+		pause(wait)
 		deactivateHue()
 		pause(wait)
 		deactivateHue()
