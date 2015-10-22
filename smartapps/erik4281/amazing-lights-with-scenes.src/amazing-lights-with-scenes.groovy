@@ -207,26 +207,26 @@ def eventOffHandler(evt) {
 	state.eventStopTime = now()
 	if (evt.name == "switch" && evt.value == "off" && moodOk) {
 		log.info "Switch was set to off. Starting timer to switch off."
-        runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+		runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 	}
 	else if (switchOff && modeOk && daysOk && timeOk && moodOk) {
 		log.info "Switches are off and all checks passed"
-        if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
+		if ((shortModeOk || shortTimeOk) && shortDelayMinutes) {
 			log.info "Now starting short timer to switch off"
-            runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
+			runIn(shortDelayMinutes*60, turnOffAfterDelayShort, [overwrite: false])
 		}
 		else if (delayMinutes) {
 			log.info "Now starting normal timer to switch off"
-            runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
+			runIn(delayMinutes*60, turnOffAfterDelay, [overwrite: false])
 		}
 		else  {
 			log.info "Now starting to switch off"
-            turnOffAfterDelay()
+			turnOffAfterDelay()
 		}
 	}
 	else if (switchOff && moodOk) {
 		log.info "Now starting 30 minute timer for backup off switching"
-        runIn(30*60, turnOffAfterDelay, [overwrite: false])
+		runIn(30*60, turnOffAfterDelay, [overwrite: false])
 	}
 }
 
@@ -234,7 +234,7 @@ def illuminanceHandler(evt) {
 	if (modeOk && daysOk && timeOk && moodOk) {
 		if (state.lastStatus != "off" && evt.integerValue > (lightOffValue ?: 150)) {
 			log.info "Light was not off and brightness was too high"
-            deactivateHue()
+			deactivateHue()
 		}
 		else if (state.eventStopTime) {
 			if (state.lastStatus != "off" && switchOff) {
@@ -253,12 +253,12 @@ def illuminanceHandler(evt) {
 			}
 			else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100) && switchOff != true) {
 				log.info "Light was not on and brightness was too low"
-                activateHue()
+				activateHue()
 			}
 		}
 		else if (state.lastStatus != "on" && evt.integerValue < (lightOnValue ?: 100)){
 			log.info "Light was not on and brightness was too low"
-            activateHue()
+			activateHue()
 		}
 	}
 }
@@ -303,7 +303,7 @@ private activateHue() {
 		else {
 			light.off()
 		}
-        if (type != "switch" && moodOk) {
+		if (type != "switch" && moodOk) {
 			def level = switchLevel(sceneId, light)
 			if (type == "level") {
 				if (level != null) {
@@ -379,8 +379,12 @@ private activateHue() {
 
 private deactivateHue() {
 	state.lastStatus = "off"
-    log.info "Deactivating Hue now (3x)"
+	log.info "Deactivating Hue now (3x)"
 	lights.each {light ->
+		light.off()
+		pause(25)
+		light.off()
+		pause(25)
 		light.off()
 		pause(25)
 		light.off()
@@ -396,13 +400,13 @@ private deactivateHue() {
 private getTiming() {
 	def sceneId = params.sceneId as Integer ?: state.sceneId
 	log.info "Before sceneId = ${sceneId}"
-    log.info "START"
-    sceneId = ["1", "2", "3", "4", "5", "6", "7", "8"]
-    sceneId.each {
+	log.info "START"
+	sceneId = ["1", "2", "3", "4", "5", "6", "7", "8"]
+	sceneId.each {
 		log.debug it
-    //    log.debug sceneName${it}
+	//    log.debug sceneName${it}
 	}
-    log.info "END"
+	log.info "END"
 	if (sceneName1 && modeOkScene_1 && daysOkScene_1 && timeOkScene_1 && switchOnScene_1 && switchOffScene_1) {
 		state.selectedSceneId = 1
 		log.info sceneName1
