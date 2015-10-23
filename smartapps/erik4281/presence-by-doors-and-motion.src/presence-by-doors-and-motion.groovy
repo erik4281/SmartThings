@@ -152,14 +152,18 @@ def changeHome() {
 			homeOn.each {light ->
 				light.on()
 				pause(25)
-                light.on()
+				light.on()
+				pause(25)
+				light.on()
 			}
 		}
 		if (homeOff) {
 			homeOff.each {light ->
 				light.off()
 				pause(25)
-                light.off()
+				light.off()
+				pause(25)
+				light.off()
 			}
 		}
 	}
@@ -186,14 +190,18 @@ def changeAway() {
 				awayOn.each {light ->
 					light.on()
 					pause(25)
-                    light.on()
+					light.on()
+					pause(25)
+					light.on()
 				}
 			}
 			if (awayOff) {
 				awayOff.each {light ->
 					light.off()
 					pause(25)
-                    light.off()
+					light.off()
+					pause(25)
+					light.off()
 				}
 			}
 		}
