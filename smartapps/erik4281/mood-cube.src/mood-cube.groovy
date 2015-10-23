@@ -170,6 +170,10 @@ def positionHandler(evt) {
 			}
 		}
 		restoreStates(sceneId)
+		pause(25)
+		restoreStates(sceneId)
+		pause(25)
+		restoreStates(sceneId)
 	}
 	else {
 		log.trace "No status change"
@@ -221,17 +225,9 @@ private restoreStates(sceneId) {
 		log.debug "${light.displayName} is '$isOn'"
 		if (isOn) {
 			light.on()
-            pause(25)
-            light.on()
-            pause(25)
-            light.on()
 		}
 		else {
 			light.off()
-            pause(25)
-            light.off()
-            pause(25)
-            light.off()
 		}
 		if (type != "switch") {
 			def level = switchLevel(sceneId, light)
@@ -239,10 +235,6 @@ private restoreStates(sceneId) {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
 				}
 			}
 			else if (type == "color") {
@@ -298,27 +290,15 @@ private restoreStates(sceneId) {
 				log.debug "${light.displayName} color is level: $level, hue: $hue, sat: $saturation"
 				if (level != null) {
 					light.setColor(level: level, hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(level: level, hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(level: level, hue: hue, saturation: saturation)
 				}
 				else {
 					light.setColor(hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(hue: hue, saturation: saturation)
-                    pause(25)
-                    light.setColor(hue: hue, saturation: saturation)
 				}
 			}
 			else {
 				log.debug "${light.displayName} level is '$level'"
 				if (level != null) {
 					light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
-                    pause(25)
-                    light.setLevel(level)
 				}
 			}
 		}
