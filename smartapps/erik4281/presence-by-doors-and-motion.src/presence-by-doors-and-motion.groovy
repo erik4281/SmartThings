@@ -98,7 +98,13 @@ def motionActiveHandler(evt) {
 	if (overrideSensor) {
 		def current = overrideSensor.currentValue('motion')
 		def overrideValue = overrideSensor.find{it.currentMotion == "active"}
-		if (overrideValue) {
+		if (overrideValue && awayModeOk) {
+			if (pushOn == "Yes") {
+				sendPush("Motion: Home-mode activated and alarm switched off.")
+			}
+			else {
+				sendNotificationEvent("Motion: Home-mode activated and alarm switched off.")
+			}
 			changeHome()
 		}
 	}
@@ -119,7 +125,24 @@ def contactOpenHandler(evt) {
 	log.debug "contactOpenHandler"
 	state.contactClose = null
 	log.info state.contactClose
-	changeHome()
+	if (awayModeOk || sleepModeOk) {
+		if (pushOn == "Yes") {
+			sendPush("Arrive: Home-mode activated and alarm switched off.")
+		}
+		else {
+			sendNotificationEvent("Arrive: Home-mode activated and alarm switched off.")
+		}
+		changeHome()
+	}
+	else {
+		if (pushOn == "Yes") {
+			sendPush("Front door opened.")
+		}
+		else {
+			sendNotificationEvent("Front door opened.")
+		}
+	}
+	runin((5*60), doorChecker, [overwrite: false])
 }
 
 def contactCloseHandler(evt) {
@@ -127,6 +150,7 @@ def contactCloseHandler(evt) {
 	state.contactClose = now()
 	log.info state.contactClose
 	log.info "Changing to away in ${delayMinutes} minutes"
+	sendNotificationEvent("Front door closed.")
 	runIn((delayMinutes*60), changeAway, [overwrite: true])
 }
 
@@ -134,37 +158,41 @@ def contactCloseHandler(evt) {
  * Actuator methods *
  ********************/
 
-def changeHome() {
-	log.debug "Change home mode"
-	if (awayModeOk) {
-		log.debug "Changing to home"
-		changeMode(homeMode)
-		if (homeAlarm) {
-			sendLocationEvent(name: "alarmSystemStatus", value: homeAlarm)
-		}
+def doorChecker() {
+	if (state.contactClose) {
+	}
+	else {
 		if (pushOn == "Yes") {
-			sendPush("Arrive: Alarm switched off.")
+			sendPush("Front door still opened.")
 		}
 		else {
-			sendNotificationEvent("Arrive: Alarm switched off.")
+			sendNotificationEvent("Front door still opened.")
 		}
-		if (homeOn) {	
-			homeOn.each {light ->
-				light.on()
-				pause(25)
-				light.on()
-				pause(25)
-				light.on()
-			}
+	}
+}
+
+def changeHome() {
+	log.debug "Change home mode"
+	changeMode(homeMode)
+	if (homeAlarm) {
+		sendLocationEvent(name: "alarmSystemStatus", value: homeAlarm)
+	}
+	if (homeOn) {	
+		homeOn.each {light ->
+			light.on()
+			pause(25)
+			light.on()
+			pause(25)
+			light.on()
 		}
-		if (homeOff) {
-			homeOff.each {light ->
-				light.off()
-				pause(25)
-				light.off()
-				pause(25)
-				light.off()
-			}
+	}
+	if (homeOff) {
+		homeOff.each {light ->
+			light.off()
+			pause(25)
+			light.off()
+			pause(25)
+			light.off()
 		}
 	}
 }
