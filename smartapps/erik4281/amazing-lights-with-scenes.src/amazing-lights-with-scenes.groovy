@@ -400,13 +400,13 @@ private deactivateHue() {
 private getTiming() {
 	def sceneId = params.sceneId as Integer ?: state.sceneId
 	log.info "Before sceneId = ${sceneId}"
-	log.info "START"
-	sceneId = ["1", "2", "3", "4", "5", "6", "7", "8"]
-	sceneId.each {
-		log.debug it
+	//log.info "START"
+	//sceneId = ["1", "2", "3", "4", "5", "6", "7", "8"]
+	//sceneId.each {
+	//	log.debug it
 	//    log.debug sceneName${it}
-	}
-	log.info "END"
+	//}
+	//log.info "END"
 	if (sceneName1 && modeOkScene_1 && daysOkScene_1 && timeOkScene_1 && switchOnScene_1 && switchOffScene_1) {
 		state.selectedSceneId = 1
 		log.info sceneName1
