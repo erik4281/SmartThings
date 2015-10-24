@@ -396,13 +396,6 @@ private deactivateHue() {
 private getTiming() {
 	def sceneId = params.sceneId as Integer ?: state.sceneId
 	log.info "Before sceneId = ${sceneId}"
-	//log.info "START"
-	//sceneId = ["1", "2", "3", "4", "5", "6", "7", "8"]
-	//sceneId.each {
-	//	log.debug it
-	//    log.debug sceneName${it}
-	//}
-	//log.info "END"
 	if (sceneName1 && modeOkScene_1 && daysOkScene_1 && timeOkScene_1 && switchOnScene_1 && switchOffScene_1) {
 		state.selectedSceneId = 1
 		log.info sceneName1
@@ -596,13 +589,6 @@ private getTimeOk() {
 ////////////////////////////////////
 ////////////////////////////////////
 
-//private getModeOkScene() {
-//	def modes = state.modeChecker
-//	def result = !modes || modes.contains(location.mode)
-//	log.trace "modeOkScene = $result"
-//	result
-//}
-
 private getModeOkScene_1() {
 	def result = !modes_1 || modes_1.contains(location.mode)
 	log.trace "modeOkScene_1 = $result"
@@ -653,24 +639,6 @@ private getModeOkScene_8() {
 
 ////////////////////////////////////
 ////////////////////////////////////
-
-//private getDaysOkScene() {
-//	def days = state.dayChecker
-//	def result = true
-//	if (days) {
-//		def df = new java.text.SimpleDateFormat("EEEE")
-//		if (location.timeZone) {
-//			df.setTimeZone(location.timeZone)
-//		}
-//		else {
-//			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-//		}
-//		def day = df.format(new Date())
-//		result = days.contains(day)
-//	}
-//	log.trace "daysOkScene = $result"
-//	result
-//}
 
 private getDaysOkScene_1() {
 	def result = true
@@ -811,20 +779,6 @@ private getDaysOkScene_8() {
 ////////////////////////////////////
 ////////////////////////////////////
 
-//private getTimeOkScene() {
-//	def starting = state.startingChecker
-//	def ending = state.endingChecker
-//	def result = true
-//	if (starting && ending) {
-//		def currTime = now()
-//		def start = timeToday(starting, location?.timeZone).time
-//		def stop = timeToday(ending, location?.timeZone).time
-//		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
-//	}
-//	log.trace "timeOkScene = $result"
-//	result
-//}
-
 private getTimeOkScene_1() {
 	def result = true
 	if (starting_1 && ending_1) {
@@ -923,26 +877,6 @@ private getTimeOkScene_8() {
 
 ////////////////////////////////////
 ////////////////////////////////////
-
-//private getSwitchOnScene() {
-//    def switchOn = state.switchOnChecker
-//	def result = true
-//	if (switchOn) {
-//		def current = switchOn.currentValue('switch')
-//		def switchOnValue = switchOn.find{it.currentSwitch == "on"}
-//		if (switchOnValue) {
-//			result = true
-//		}
-//		else {
-//			result = false
-//		}
-//	}
-//	else {
-//		result = true
-//	}
-//	log.trace "switchOnScene = $result"
-//	result
-//}
 
 private getSwitchOnScene_1() {
 	def result = true
@@ -1098,26 +1032,6 @@ private getSwitchOnScene_8() {
 
 ////////////////////////////////////
 ////////////////////////////////////
-
-//private getSwitchOffScene() {
-//	def switchOff = state.switchOffChecker
-//	def result = true
-//	if (switchOff) {
-//		def current = switchOff.currentValue('switch')
-//		def switchOffValue = switchOff.find{it.currentSwitch == "on"}
-//		if (switchOffValue) {
-//			result = false
-//		}
-//		else {
-//			result = true
-//		}
-//	}
-//	else {
-//		result = true
-//	}
-//	log.trace "switchOffScene = $result"
-//	result
-//}
 
 private getSwitchOffScene_1() {
 	def result = true
