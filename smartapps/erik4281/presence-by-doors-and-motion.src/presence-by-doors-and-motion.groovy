@@ -142,7 +142,7 @@ def contactOpenHandler(evt) {
 			sendNotificationEvent("Front door opened.")
 		}
 	}
-	runin((5*60), doorChecker, [overwrite: false])
+	runIn(300, doorChecker, [overwrite: true])
 }
 
 def contactCloseHandler(evt) {
@@ -159,6 +159,7 @@ def contactCloseHandler(evt) {
  ********************/
 
 def doorChecker() {
+	log.info "Starting doorchecker"
 	if (state.contactClose) {
 	}
 	else {
@@ -180,18 +181,18 @@ def changeHome() {
 	if (homeOn) {	
 		homeOn.each {light ->
 			light.on()
-			pause(25)
+			pause(250)
 			light.on()
-			pause(25)
+			pause(250)
 			light.on()
 		}
 	}
 	if (homeOff) {
 		homeOff.each {light ->
 			light.off()
-			pause(25)
+			pause(250)
 			light.off()
-			pause(25)
+			pause(250)
 			light.off()
 		}
 	}
@@ -217,18 +218,18 @@ def changeAway() {
 			if (awayOn) {	
 				awayOn.each {light ->
 					light.on()
-					pause(25)
+					pause(250)
 					light.on()
-					pause(25)
+					pause(250)
 					light.on()
 				}
 			}
 			if (awayOff) {
 				awayOff.each {light ->
 					light.off()
-					pause(25)
+					pause(250)
 					light.off()
-					pause(25)
+					pause(250)
 					light.off()
 				}
 			}
@@ -267,7 +268,10 @@ private getHomeModeOk() {
 }
 
 private getSleepModeOk() {
-	def result = sleepMode.containt(location.mode)
+	def result = false
+	if (sleepMode) {
+		result = sleepMode.contains(location.mode)
+	}
 	log.trace "SleepModeOk = $result"
 	result
 }

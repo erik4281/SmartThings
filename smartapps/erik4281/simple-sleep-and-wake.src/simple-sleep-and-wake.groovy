@@ -112,6 +112,7 @@ def goToSleep() {
 			def elapsed = now() - state.motionStopTime
 			if (elapsed >= ((sleepDelay ?: 0) * 60000L) - 2000) {
                 sendNotificationEvent("Sleep: Alarm switched on.")
+				log.debug "Changing to sleep mode"
                 changeMode(sleepMode)
                 if (sleepAlarm) {
                     sendLocationEvent(name: "alarmSystemStatus", value: sleepAlarm)
@@ -119,14 +120,18 @@ def goToSleep() {
                 if (sleepOn) {
                     sleepOn.each {light ->
                         light.on()
-                        pause(25)
+                        pause(250)
+                        light.on()
+                        pause(250)
                         light.on()
                     }
                 }
                 if (sleepOff) {
                     sleepOff.each {light ->
                         light.off()
-                        pause(25)
+                        pause(250)
+                        light.off()
+                        pause(250)
                         light.off()
                     }
                 }
@@ -141,6 +146,7 @@ def goToSleep() {
 def goToWake() {
 	log.trace "In goToWake"
 	sendNotificationEvent("Wake: Alarm switched off.")
+	log.debug "Changing to wake mode"
 	changeMode(wakeUpMode)
 	if (wakeAlarm) {
 		sendLocationEvent(name: "alarmSystemStatus", value: wakeAlarm)
@@ -148,14 +154,19 @@ def goToWake() {
 	if (wakeUpOn) {
 		wakeUpOn.each {light ->
 			light.on()
-			pause(25)
+			pause(250)
             light.on()
+			pause(250)
+            light.on()
+
 		}
 	}
 	if (wakeUpOff) {
 		wakeUpOff.each {light ->
 			light.off()
-			pause(25)
+			pause(250)
+            light.off()
+			pause(250)
             light.off()
 		}
 	}

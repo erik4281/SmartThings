@@ -170,9 +170,9 @@ def positionHandler(evt) {
 			}
 		}
 		restoreStates(sceneId)
-		pause(25)
+		pause(100)
 		restoreStates(sceneId)
-		pause(25)
+		pause(100)
 		restoreStates(sceneId)
 	}
 	else {

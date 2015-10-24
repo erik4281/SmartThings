@@ -382,13 +382,9 @@ private deactivateHue() {
 	log.info "Deactivating Hue now (3x)"
 	lights.each {light ->
 		light.off()
-		pause(25)
+		pause(250)
 		light.off()
-		pause(25)
-		light.off()
-		pause(25)
-		light.off()
-		pause(25)
+		pause(250)
 		light.off()
 	}
 }
