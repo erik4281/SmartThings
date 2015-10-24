@@ -83,7 +83,7 @@ def scenePage(params=[:]) {
 			moodSwitch.each {moodCube ->
 				input "onoff_${sceneId}_${moodCube.id}", "boolean", title: moodCube.displayName
 			}
-        }
+		}
 		section {
 			href "devicePage", title: "Show Device States", params: [sceneId:sceneId], description: "", state: sceneIsDefined(sceneId) ? "complete" : "incomplete"
 		}
