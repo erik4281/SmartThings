@@ -35,7 +35,7 @@ definition(
 preferences {
 	section ("Monitor motion sensors") {
     	input "motionSensor", "capability.motionSensor", title: "If no motion here", required: true, multiple: true
-    }
+	}
 	section ("Go to sleep...") {
 		input "sleepMode", "mode", title: "Change mode to?", required: true
 		input "sleepDelay", "number", title: "After X minutes without motion.", required: false
@@ -83,15 +83,15 @@ def initialize() {
 
 def eventHandler(evt) {
 	log.trace "Sleep & Wake eventHandler"
-    def current = motionSensor.currentValue("motion")
-    def motionValue = motionSensor.find{it.currentMotion == "active"}
-    if (motionValue) {
-    	log.info "Motion detected"
-        state.motionStopTime = null
-        if (allOkWake) {
-        	goToWake()
-        }
-    }
+	def current = motionSensor.currentValue("motion")
+	def motionValue = motionSensor.find{it.currentMotion == "active"}
+	if (motionValue) {
+		log.info "Motion detected"
+		state.motionStopTime = null
+		if (allOkWake) {
+			goToWake()
+		}
+	}
 	else {
 		log.info "Motion stopped"
 		state.motionStopTime = now()
@@ -111,30 +111,30 @@ def goToSleep() {
 		if (allOkSleep) {
 			def elapsed = now() - state.motionStopTime
 			if (elapsed >= ((sleepDelay ?: 0) * 60000L) - 2000) {
-                sendNotificationEvent("Sleep: Alarm switched on.")
+				sendNotificationEvent("Sleep: Alarm switched on.")
 				log.debug "Changing to sleep mode"
-                changeMode(sleepMode)
-                if (sleepAlarm) {
-                    sendLocationEvent(name: "alarmSystemStatus", value: sleepAlarm)
-                }
-                if (sleepOn) {
-                    sleepOn.each {light ->
-                        light.on()
-                        pause(250)
-                        light.on()
-                        pause(250)
-                        light.on()
-                    }
-                }
-                if (sleepOff) {
-                    sleepOff.each {light ->
-                        light.off()
-                        pause(250)
-                        light.off()
-                        pause(250)
-                        light.off()
-                    }
-                }
+				changeMode(sleepMode)
+				if (sleepAlarm) {
+					sendLocationEvent(name: "alarmSystemStatus", value: sleepAlarm)
+				}
+				if (sleepOn) {
+					sleepOn.each {light ->
+						light.on()
+						pause(250)
+						light.on()
+						pause(250)
+						light.on()
+					}
+				}
+				if (sleepOff) {
+					sleepOff.each {light ->
+						light.off()
+						pause(250)
+						light.off()
+						pause(250)
+						light.off()
+					}
+				}
 			}
 		}
 		else {
@@ -155,19 +155,18 @@ def goToWake() {
 		wakeUpOn.each {light ->
 			light.on()
 			pause(250)
-            light.on()
+			light.on()
 			pause(250)
-            light.on()
-
+			light.on()
 		}
 	}
 	if (wakeUpOff) {
 		wakeUpOff.each {light ->
 			light.off()
 			pause(250)
-            light.off()
+			light.off()
 			pause(250)
-            light.off()
+			light.off()
 		}
 	}
 }
